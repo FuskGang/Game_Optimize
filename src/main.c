@@ -65,6 +65,8 @@ void handle_input()
 
 void update()
 {
+    destinationRect.x += 1;
+    destinationRect.h += 1;
 }
 
 void draw()
@@ -73,7 +75,6 @@ void draw()
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, alien, &sourceRect, &destinationRect);
     SDL_RenderPresent(renderer);
-    // SDL_Delay(100);
 }
 
 void clean()
@@ -86,15 +87,23 @@ void clean()
     SDL_Quit();
 }
 
-int main(int argc, char *args[])
+int main(void)
 {
     is_game_running = !initialize();
 
     while (is_game_running)
     {
+        Uint32 frameStart = SDL_GetTicks();
+
         handle_input();
         update();
         draw();
+
+        int frameTime = SDL_GetTicks() - frameStart;
+        if (frameTime < DELAY_TIME)
+        {
+            SDL_Delay(DELAY_TIME - frameTime);
+        }
     }
 
     clean();
