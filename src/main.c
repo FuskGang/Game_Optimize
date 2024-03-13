@@ -1,112 +1,52 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include "constants.h"
+#include "main.h"
 
-SDL_Window *window;
-SDL_Renderer *renderer;
+Uint32 deltaTime;
 
-SDL_Texture *alien;
-SDL_Rect sourceRect;
-SDL_Rect destinationRect;
-
-char is_game_running = TRUE;
-
-int initialize()
-{
-    if (SDL_Init(SDL_INIT_EVERYTHING) >= 0)
-    {
-        window = SDL_CreateWindow("Tanks",
-                                  SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                  640, 480,
-                                  0);
-
-        if (window != NULL)
-        {
-            renderer = SDL_CreateRenderer(window, -1, 0);
-        }
-    }
-    else
-    {
-        return -1;
-    }
-
-    SDL_Surface *image_surface = IMG_Load("assets/alien.png");
-    alien = SDL_CreateTextureFromSurface(renderer, image_surface);
-    SDL_FreeSurface(image_surface);
-
-    SDL_QueryTexture(alien, NULL, NULL, &sourceRect.w, &sourceRect.h);
-    destinationRect.x = sourceRect.x = 0;
-    destinationRect.y = sourceRect.y = 0;
-    destinationRect.w = sourceRect.w;
-    destinationRect.h = sourceRect.h;
-
-    return 0;
-}
-
-void handle_input()
-{
-    SDL_Event event;
-    if (SDL_PollEvent(&event))
-    {
-        switch (event.type)
-        {
-        case SDL_QUIT:
-            is_game_running = FALSE;
-            break;
-        case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE)
-                is_game_running = FALSE;
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-void update()
-{
-    destinationRect.x += 1;
-    destinationRect.h += 1;
-}
-
-void draw()
-{
-    SDL_SetRenderDrawColor(renderer, 0, 50, 0, 255);
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, alien, &sourceRect, &destinationRect);
-    SDL_RenderPresent(renderer);
-}
-
-void clean()
-{
-    SDL_DestroyTexture(alien);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-
-    IMG_Quit();
-    SDL_Quit();
-}
+static void capFrameRate(Uint32 *then, Uint32 *deltaTime);
 
 int main(void)
 {
-    is_game_running = !initialize();
+    memset(&app, 0, sizeof(App));
 
-    while (is_game_running)
+    init_SDL();
+
+    atexit(cleanup);
+
+    init_menu();
+
+    Uint32 prevTime = 0;
+    while (TRUE)
     {
-        Uint32 frameStart = SDL_GetTicks();
+        prepare_frame();
 
         handle_input();
-        update();
-        draw();
+        app.delegate.update();
+        app.delegate.draw();
 
-        int frameTime = SDL_GetTicks() - frameStart;
-        if (frameTime < DELAY_TIME)
-        {
-            SDL_Delay(DELAY_TIME - frameTime);
-        }
+        present_frame();
+
+        capFrameRate(&prevTime, &deltaTime);
     }
 
-    clean();
-
     return 0;
+}
+
+static void capFrameRate(Uint32 *then, Uint32 *deltaTime)
+{
+    long wait;
+
+    wait = DELAY_TIME;
+
+    *deltaTime = SDL_GetTicks() - *then;
+
+    wait -= *deltaTime;
+
+    if (wait < 1)
+    {
+        wait = 1;
+    }
+
+    SDL_Delay(wait);
+
+    *then = SDL_GetTicks();
 }
