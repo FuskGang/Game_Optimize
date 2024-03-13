@@ -2,28 +2,58 @@
 
 static void update(void);
 static void draw(void);
-static void update_user(void);
+static void draw_cursor(void);
 
 static SDL_Texture *cursorTexture;
 
 void init_menu(void)
 {
-    app.delegate.update = update;
-    app.delegate.draw = draw;
+    Widget *w;
+	int x;
+
+	x = 500;
+
+	w = create_widget("start");
+	w->x = x;
+	w->y = 200;
+	strcpy(w->label, "Start");
+
+	app.active_widget = w;
+
+	w = create_widget("options");
+	w->x = x;
+	w->y = 250;
+	strcpy(w->label, "Options");
+
+	w = create_widget("credits");
+	w->x = x;
+	w->y = 300;
+	strcpy(w->label, "Credits");
+
+	w = create_widget("exit");
+	w->x = x;
+	w->y = 350;
+	strcpy(w->label, "Exit");
+
+	app.delegate.update = &update;
+	app.delegate.draw = &draw;
+
 
     cursorTexture = load_texture("assets/alien.png");
 }
 
 static void update(void)
 {
-    update_user();
+    do_widgets();
 }
 
 static void draw(void)
 {
-    blit(cursorTexture, app.mouse.x, app.mouse.y, 1);
+    draw_cursor();
+    draw_widgets();
 }
 
-static void update_user(void)
+void draw_cursor(void)
 {
+    blit(cursorTexture, app.mouse.x, app.mouse.y, 1);
 }

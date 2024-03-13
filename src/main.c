@@ -12,6 +12,10 @@ int main(void)
 
     atexit(cleanup);
 
+    init_fonts();
+
+    init_widgets();
+
     init_menu();
 
     Uint32 prevTime = 0;

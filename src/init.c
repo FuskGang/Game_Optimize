@@ -14,6 +14,12 @@ void init_SDL(void)
         exit(1);
     }
 
+    if (TTF_Init() < 0)
+    {
+        printf("Couldn't initialize SDL TTF: %s\n", SDL_GetError());
+        exit(1);
+    }
+
     app.window = SDL_CreateWindow("Tanks",
                                   SDL_WINDOWPOS_CENTERED,
                                   SDL_WINDOWPOS_CENTERED,
@@ -43,6 +49,8 @@ void cleanup(void)
     SDL_DestroyRenderer(app.renderer);
 
     SDL_DestroyWindow(app.window);
+
+    TTF_Quit();
 
     SDL_Quit();
 }
