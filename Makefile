@@ -8,7 +8,7 @@ endif
 
 CC = gcc
 CFLAGS = -Wall -Wextra
-LDLIBS = -lSDL2 -lSDL2_image -lSDL2_ttf
+LDLIBS = -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
 SRCDIR = src
 BUILDDIR = build

@@ -11,6 +11,8 @@ extern void draw_text(char *text, int x, int y, int r, int g, int b);
 extern void do_widgets(void);
 extern void draw_widgets(void);
 extern Widget *create_widget(char *name);
+extern void init_map(void);
+extern void clear_widgets(void);
 
 extern App app;
 

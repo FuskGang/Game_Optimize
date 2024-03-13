@@ -49,6 +49,14 @@ void do_widgets(void)
 			app.active_widget = widgetHead.next;
 		}
 	}
+
+	if (app.keyboard[SDL_SCANCODE_SPACE] || app.keyboard[SDL_SCANCODE_RETURN])
+	{
+		if (app.active_widget->action != NULL)
+		{
+			app.active_widget->action();
+		}
+	}
 }
 
 void draw_widgets(void)
@@ -56,7 +64,7 @@ void draw_widgets(void)
 	Widget *w;
 	SDL_Color c;
 
-	for (w = widgetHead.next ; w != NULL ; w = w->next)
+	for (w = widgetHead.next; w != NULL; w = w->next)
 	{
 		if (w == app.active_widget)
 		{
@@ -72,4 +80,20 @@ void draw_widgets(void)
 
 		draw_text(w->label, w->x, w->y, c.r, c.g, c.b);
 	}
+}
+
+void clear_widgets(void)
+{
+    Widget *current = widgetHead.next;
+    Widget *next;
+
+    while (current != NULL)
+    {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+
+    widgetHead.next = NULL;
+    widgetTail = &widgetHead;
 }

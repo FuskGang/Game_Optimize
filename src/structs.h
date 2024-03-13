@@ -24,6 +24,7 @@ typedef struct Widget
 	char label[MAX_NAME_LENGTH];
 	struct Widget *prev;
 	struct Widget *next;
+	void (*action)(void);
 } Widget;
 
 typedef struct

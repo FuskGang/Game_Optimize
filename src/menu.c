@@ -3,11 +3,15 @@
 static void update(void);
 static void draw(void);
 static void draw_cursor(void);
+static void start(void);
+static void quit(void);
 
 static SDL_Texture *cursorTexture;
 
 void init_menu(void)
 {
+	clear_widgets();
+
     Widget *w;
 	int x;
 
@@ -17,6 +21,7 @@ void init_menu(void)
 	w->x = x;
 	w->y = 200;
 	strcpy(w->label, "Start");
+	w->action = &start;
 
 	app.active_widget = w;
 
@@ -34,6 +39,7 @@ void init_menu(void)
 	w->x = x;
 	w->y = 350;
 	strcpy(w->label, "Exit");
+	w->action = quit;
 
 	app.delegate.update = &update;
 	app.delegate.draw = &draw;
@@ -49,11 +55,21 @@ static void update(void)
 
 static void draw(void)
 {
-    draw_cursor();
     draw_widgets();
+	draw_cursor();
 }
 
 void draw_cursor(void)
 {
     blit(cursorTexture, app.mouse.x, app.mouse.y, 1);
+}
+
+static void start(void)
+{
+	init_map();
+}
+
+static void quit(void)
+{
+	exit(0);
 }
