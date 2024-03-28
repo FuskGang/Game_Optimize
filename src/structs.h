@@ -16,6 +16,15 @@ typedef struct
 	int y;
 } Mouse;
 
+typedef struct
+{
+    float x, y;
+    float was_x, was_y;
+    float velocity;
+    float angle;
+	int was_fire;
+} Bullet;
+
 typedef struct Widget
 {
 	char name[MAX_NAME_LENGTH];
@@ -29,6 +38,7 @@ typedef struct Widget
 
 typedef struct
 {
+	Bullet bullet;
 	Delegate delegate;
 	SDL_Renderer *renderer;
 	SDL_Window *window;
