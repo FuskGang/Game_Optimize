@@ -6,7 +6,7 @@
 #include "widgets.h"
 #include "draw.h"
 #include "textures.h"
-#include "generate_map.h"
+#include "map.h"
 
 void init_menu(void);
 

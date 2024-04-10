@@ -1,5 +1,5 @@
-#ifndef GENERATE_MAP
-#define GENERATE_MAP
+#ifndef MAP
+#define MAP
 
 #include <time.h>
 
@@ -8,4 +8,4 @@
 
 void init_map(void);
 
-#endif /* GENERATE_MAP */
+#endif /* MAP */

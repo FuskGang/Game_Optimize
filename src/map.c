@@ -1,4 +1,4 @@
-#include "generate_map.h"
+#include "map.h"
 
 #define SKY_RGBA 39, 80, 245, 1
 #define GRASS_RGBA 39, 136, 48, 1
