@@ -1,26 +1,18 @@
 ifeq ($(OS),Windows_NT)
-    RM = del
+    RM = del /Q
     EXE = .exe
-    LDLIBS = -lmingw32 -lSDL2main
-    CPY = xcopy /s /i /e
-    CPY_FOLDER = assets
-    DELMTR = \\
-
 else
     RM = rm -f
     EXE = 
-    LDLIBS = -lm
-    CPY = rsync -r --update
-    CPY_FOLDER = 
-    DELMTR = /
 endif
 
 CC = gcc
 CFLAGS = -Wall -Wextra
-LDLIBS += -lSDL2 -lSDL2_image -lSDL2_ttf
+LDLIBS = -lSDL2 -lSDL2_image -lSDL2_ttf -lm
+
 SRCDIR = src
 BUILDDIR = build
-TARGET = $(BUILDDIR)$(DELMTR)game$(EXE)
+TARGET = $(BUILDDIR)/game$(EXE)
 
 SOURCES := $(wildcard $(SRCDIR)/*.c)
 OBJECTS := $(SOURCES:$(SRCDIR)/%.c=$(BUILDDIR)/%.o)
@@ -36,10 +28,10 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR):
-	mkdir $(BUILDDIR)
+	mkdir -p $(BUILDDIR)
 
 clean:
-	$(RM) $(BUILDDIR)$(DELMTR)*.o $(TARGET)
+	$(RM) $(BUILDDIR)/*.o $(TARGET)
 
 debug: CFLAGS += -DDEBUG -g
 debug: all
@@ -48,4 +40,4 @@ run: all
 	./$(TARGET)
 
 copy_assets: 
-	$(CPY) $(SRCDIR)$(DELMTR)assets $(BUILDDIR)$(DELMTR)$(CPY_FOLDER)
+	rsync -r --update $(SRCDIR)/assets $(BUILDDIR)/
