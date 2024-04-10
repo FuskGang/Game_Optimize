@@ -4,41 +4,20 @@
 #define GRASS_RGBA 39, 136, 48, 1
 #define GEN_FUNC_A -6.0f
 
-int pixel_map[SCREEN_WIDTH][SCREEN_HEIGHT];
-
 static void generate_pixel_map();
-static void draw_pixel_map(void);
 static int get_noise(double x, double a);
 static double noise_function(double x, double a);
-static void update(void);
-static void draw(void);
+
+int pixel_map[SCREEN_WIDTH][SCREEN_HEIGHT];
 
 void init_map(void)
 {
     size_t size = sizeof(pixel_map);
     memset(pixel_map, 0, size);
     generate_pixel_map();
-
-    app.delegate.update = &update;
-    app.delegate.draw = &draw;
 }
 
-static void update(void)
-{
-    if (app.keyboard[SDL_SCANCODE_ESCAPE])
-    {
-        app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
-        init_menu();
-    }
-}
-
-static void draw(void)
-{
-    draw_pixel_map();
-}
-
-
-static void generate_pixel_map()
+void generate_pixel_map()
 {
     srand(time(NULL));
 
@@ -77,7 +56,7 @@ static double noise_function(double x, double a)
     return fix_y;
 }
 
-static void draw_pixel_map(void)
+void draw_pixel_map(void)
 {
     SDL_Rect r = {.w = 1, .h = 1};
     SDL_SetRenderDrawColor(app.renderer, GRASS_RGBA);

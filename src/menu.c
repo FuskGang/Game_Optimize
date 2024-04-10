@@ -66,7 +66,7 @@ void draw_cursor(void)
 
 static void start(void)
 {
-	init_map();
+	init_game();
 }
 
 static void quit(void)

@@ -16,6 +16,18 @@ typedef struct
 	int y;
 } Mouse;
 
+typedef struct
+{
+	char player_name[255];
+	SDL_Texture *texture;
+	SDL_Color color;
+	int x;
+	int y;
+	int angle;
+	int power;
+	/*weapon list*/
+} Tank;
+
 typedef struct Widget
 {
 	char name[MAX_NAME_LENGTH];
