@@ -1,5 +1,6 @@
 #include "main.h"
 
+App app;
 Uint32 deltaTime;
 
 static void capFrameRate(Uint32 *then, Uint32 *deltaTime);

@@ -10,6 +10,4 @@ void do_widgets(void);
 void draw_widgets(void);
 void clear_widgets(void);
 
-extern App app;
-
 #endif /* WIDGETS */

@@ -12,4 +12,6 @@
 #include "constants.h"
 #include "structs.h"
 
+extern App app;
+
 #endif /* COMMON */

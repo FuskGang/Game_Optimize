@@ -9,6 +9,4 @@
 #include "widgets.h"
 #include "menu.h"
 
-App app;
-
 #endif /* MAIN */

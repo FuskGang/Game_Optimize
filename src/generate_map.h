@@ -8,6 +8,4 @@
 
 void init_map(void);
 
-extern App app;
-
 #endif /* GENERATE_MAP */

@@ -10,6 +10,4 @@
 
 void init_menu(void);
 
-extern App app;
-
 #endif /* MENU */
