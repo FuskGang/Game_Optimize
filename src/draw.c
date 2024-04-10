@@ -22,6 +22,17 @@ SDL_Texture *load_texture(char *filename)
     return texture;
 }
 
+SDL_Surface *load_surface(char *filename)
+{
+    SDL_Surface *surface;
+
+    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", filename);
+
+    surface = IMG_Load(filename);
+
+    return surface;
+}
+
 void blit(SDL_Texture *texture, int x, int y, int center)
 {
     SDL_Rect dest;
