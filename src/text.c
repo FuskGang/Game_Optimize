@@ -1,8 +1,6 @@
 #include "text.h"
 
-void init_fonts(void);
-SDL_Texture *get_text_texture(char *text, int *w, int *h);
-void draw_text(char *text, int x, int y, int r, int g, int b);
+static SDL_Texture *get_text_texture(char *text, int *w, int *h);
 
 static TTF_Font *font;
 static SDL_Color white = {255, 255, 255, 255};
@@ -12,7 +10,7 @@ void init_fonts(void)
 	font = TTF_OpenFont("assets/SourceCodePro-Regular.ttf", FONT_SIZE);
 }
 
-SDL_Texture *get_text_texture(char *text, int *w, int *h)
+static SDL_Texture *get_text_texture(char *text, int *w, int *h)
 {
 	SDL_Surface *surface;
 

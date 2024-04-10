@@ -2,15 +2,12 @@
 #define MAIN
 
 #include "common.h"
-
-extern void cleanup(void);
-extern void handle_input(void);
-extern void init_SDL(void);
-extern void init_fonts(void);
-extern void init_widgets(void);
-extern void init_menu(void);
-extern void prepare_frame(void);
-extern void present_frame(void);
+#include "init.h"
+#include "input.h"
+#include "draw.h"
+#include "text.h"
+#include "widgets.h"
+#include "menu.h"
 
 App app;
 

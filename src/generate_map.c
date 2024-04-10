@@ -6,6 +6,10 @@
 
 int pixel_map[SCREEN_WIDTH][SCREEN_HEIGHT];
 
+static void generate_pixel_map();
+static void draw_pixel_map(void);
+static int get_noise(double x, double a);
+static double noise_function(double x, double a);
 static void update(void);
 static void draw(void);
 
@@ -34,7 +38,7 @@ static void draw(void)
 }
 
 
-void generate_pixel_map()
+static void generate_pixel_map()
 {
     srand(time(NULL));
 
@@ -57,7 +61,7 @@ void generate_pixel_map()
     }
 }
 
-int get_noise(double x, double a)
+static int get_noise(double x, double a)
 {
     double tmp_noise = noise_function(x, a);
     int level_noise = (int)tmp_noise;
@@ -65,7 +69,7 @@ int get_noise(double x, double a)
     return level_noise;
 }
 
-double noise_function(double x, double a)
+static double noise_function(double x, double a)
 {
     double y = fabs(sin(1 + cos(x) - cos(a) + (a / cos(5 * a))) + (x * a) / 3);
     double fix_y = y * 100.0f + (SCREEN_HEIGHT) * 0.32f;
@@ -73,7 +77,7 @@ double noise_function(double x, double a)
     return fix_y;
 }
 
-void draw_pixel_map(void)
+static void draw_pixel_map(void)
 {
     SDL_Rect r = {.w = 1, .h = 1};
     SDL_SetRenderDrawColor(app.renderer, GRASS_RGBA);

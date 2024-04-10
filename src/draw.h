@@ -5,6 +5,11 @@
 
 #include <SDL2/SDL_image.h>
 
+void prepare_frame(void);
+void present_frame(void);
+SDL_Texture *load_texture(char *filename);
+void blit(SDL_Texture *texture, int x, int y, int center);
+
 extern App app;
 
 #endif /* DRAW */

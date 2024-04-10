@@ -1,6 +1,6 @@
 #include "input.h"
 
-void do_key_up(SDL_KeyboardEvent *event)
+static void do_key_up(SDL_KeyboardEvent *event)
 {
     if (event->repeat == 0 && event->keysym.scancode < MAX_KEYBOARD_KEYS)
     {
@@ -8,7 +8,7 @@ void do_key_up(SDL_KeyboardEvent *event)
     }
 }
 
-void do_key_down(SDL_KeyboardEvent *event)
+static void do_key_down(SDL_KeyboardEvent *event)
 {
     if (event->repeat == 0 && event->keysym.scancode < MAX_KEYBOARD_KEYS)
     {

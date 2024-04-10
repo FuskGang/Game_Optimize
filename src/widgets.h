@@ -2,8 +2,13 @@
 #define WIDGETS
 
 #include "common.h"
+#include "text.h"
 
-extern void draw_text(char *text, int x, int y, int r, int g, int b);
+void init_widgets(void);
+Widget *create_widget(char *name);
+void do_widgets(void);
+void draw_widgets(void);
+void clear_widgets(void);
 
 extern App app;
 

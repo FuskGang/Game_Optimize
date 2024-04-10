@@ -6,6 +6,7 @@
 #include "common.h"
 #include "textures.h"
 
-extern SDL_Texture *to_texture(SDL_Surface *surface, int destroySurface);
+void init_fonts(void);
+void draw_text(char *text, int x, int y, int r, int g, int b);
 
 #endif /* TEXT */
