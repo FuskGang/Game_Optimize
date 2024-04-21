@@ -12,11 +12,20 @@ typedef struct
 
 typedef struct
 {
+	int start_x, end_x;
+	int start_y, end_y;
+	int thickness, length;
+	int degrees;
+	double angle;
+} Muzzle;
+
+typedef struct
+{
 	char player_name[255];
 	SDL_Texture *texture;
 	SDL_Color color;
 	SDL_Rect size;
-	int angle;
+	Muzzle muzzle;
 	int power;
 	/*weapon list*/
 } Tank;
