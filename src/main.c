@@ -5,7 +5,7 @@ Uint32 deltaTime;
 
 static void capFrameRate(Uint32 *then, Uint32 *deltaTime);
 
-int main(void)
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[])
 {
     memset(&app, 0, sizeof(App));
 
