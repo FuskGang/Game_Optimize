@@ -17,7 +17,7 @@ endif
 
 CC = gcc
 CFLAGS = -Wall -Wextra
-LDLIBS += -lSDL2 -lSDL2_image -lSDL2_ttf
+LDLIBS += -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_gfx
 SRCDIR = src
 BUILDDIR = build
 TARGET = $(BUILDDIR)$(DELMTR)game$(EXE)

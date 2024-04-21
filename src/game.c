@@ -3,9 +3,10 @@
 static void update(void);
 static void update_tank(void);
 static void draw(void);
-static void init_player();
+static void init_player(void);
 static void draw_player1(void);
 static float calculate_delta_time(void);
+static void draw_stats(void);
 
 static Tank *player1;
 
@@ -18,7 +19,7 @@ void init_game(void)
     app.delegate.draw = draw;
 }
 
-static void init_player()
+static void init_player(void)
 {
     player1 = malloc(sizeof(Tank));
     strcpy(player1->player_name, "Test");
@@ -45,6 +46,26 @@ static void update(void)
         app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
         init_menu();
     }
+
+    if (app.keyboard[SDL_SCANCODE_UP])
+    {
+        player1->angle += 1;
+        
+        if (player1->angle > 359)
+        {
+            player1->angle = 0;
+        }
+    }
+
+    if (app.keyboard[SDL_SCANCODE_DOWN])
+    {
+        player1->angle -= 1;
+        
+        if (player1->angle < 0)
+        {
+            player1->angle = 359;
+        }
+    }
 }
 
 static void update_tank(void)
@@ -63,11 +84,23 @@ static void draw(void)
 {
     draw_pixel_map();
     draw_player1();
+    draw_stats();
 }
 
 static void draw_player1(void)
 {
     blit(player1->texture, player1->size, FALSE);
+
+    int startX = player1->size.x + player1->size.w / 2;
+    int startY = player1->size.y + player1->size.h / 4;
+
+    int length = 30;
+
+    double angle = player1->angle * M_PI / 180; // Convert degrees to radians
+    int endX = startX + length * cos(angle);
+    int endY = startY + length * sin(angle);
+
+    thickLineRGBA(app.renderer, startX, startY, endX, endY, 3, 150, 150, 150, 255);
 }
 
 static float calculate_delta_time(void)
@@ -77,4 +110,11 @@ static float calculate_delta_time(void)
     float deltaTime = (float)(currentFrame - lastFrame) / 1000.0f;
     lastFrame = currentFrame;
     return deltaTime;
+}
+
+static void draw_stats(void)
+{
+    char info[100];
+    sprintf(info, "Current angle: %d", player1->angle);
+    draw_text(info, 50, 50, 255, 255, 255);
 }
