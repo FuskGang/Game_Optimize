@@ -12,17 +12,10 @@ typedef struct
 
 typedef struct
 {
-	int x;
-	int y;
-} Mouse;
-
-typedef struct
-{
 	char player_name[255];
 	SDL_Texture *texture;
 	SDL_Color color;
-	int x;
-	int y;
+	SDL_Rect size;
 	int angle;
 	int power;
 	/*weapon list*/
@@ -44,7 +37,7 @@ typedef struct
 	Delegate delegate;
 	SDL_Renderer *renderer;
 	SDL_Window *window;
-	Mouse mouse;
+	SDL_Rect mouse;
 	int keyboard[MAX_KEYBOARD_KEYS];
 	Widget *active_widget;
 } App;

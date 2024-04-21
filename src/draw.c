@@ -33,14 +33,8 @@ SDL_Surface *load_surface(char *filename)
     return surface;
 }
 
-void blit(SDL_Texture *texture, int x, int y, int center)
+void blit(SDL_Texture *texture, SDL_Rect dest, int center)
 {
-    SDL_Rect dest;
-
-    dest.x = x;
-    dest.y = y;
-    SDL_QueryTexture(texture, NULL, NULL, &dest.w, &dest.h);
-
     if (center)
 	{
 		dest.x -= dest.w / 2;

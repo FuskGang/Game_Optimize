@@ -9,6 +9,6 @@ void prepare_frame(void);
 void present_frame(void);
 SDL_Texture *load_texture(char *filename);
 SDL_Surface *load_surface(char *filename);
-void blit(SDL_Texture *texture, int x, int y, int center);
+void blit(SDL_Texture *texture, SDL_Rect dest, int center);
 
 #endif /* DRAW */

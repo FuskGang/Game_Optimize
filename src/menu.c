@@ -46,6 +46,7 @@ void init_menu(void)
 
 
     cursorTexture = load_texture("assets/alien.png");
+	SDL_QueryTexture(cursorTexture, NULL, NULL, &app.mouse.w, &app.mouse.h);
 }
 
 static void update(void)
@@ -61,7 +62,7 @@ static void draw(void)
 
 void draw_cursor(void)
 {
-    blit(cursorTexture, app.mouse.x, app.mouse.y, 1);
+    blit(cursorTexture, app.mouse, 1);
 }
 
 static void start(void)

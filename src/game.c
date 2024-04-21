@@ -23,12 +23,14 @@ static void init_player()
     player1 = malloc(sizeof(Tank));
     strcpy(player1->player_name, "Test");
     player1->color.r = 255;
-    player1->color.g = 0;
+    player1->color.g = 255;
     player1->color.b = 0;
     player1->angle = 60;
     player1->power = 60;
-    player1->x = 100;
-    player1->y = 100;
+    player1->size.x = 100;
+    player1->size.y = 100;
+    player1->size.w = 60;
+    player1->size.h = 18;
     SDL_Surface *surface = load_surface("assets/Tank.png");
     SDL_SetSurfaceColorMod(surface, player1->color.r, player1->color.g, player1->color.b);
     player1->texture = to_texture(surface, TRUE);
@@ -51,9 +53,9 @@ static void update_tank(void)
 
     int textureWidth, textureHeight;
     SDL_QueryTexture(player1->texture, NULL, NULL, &textureWidth, &textureHeight);
-    if (pixel_map[player1->x][player1->y + textureHeight] != 1 && pixel_map[player1->x + textureWidth][player1->y + textureHeight] != 1)
+    if (pixel_map[player1->size.x][player1->size.y + textureHeight] != 1 && pixel_map[player1->size.x + textureWidth][player1->size.y + textureHeight] != 1)
     {
-        player1->y += 200 * deltaTime;
+        player1->size.y += 200 * deltaTime;
     }
 }
 
@@ -65,7 +67,7 @@ static void draw(void)
 
 static void draw_player1(void)
 {
-    blit(player1->texture, player1->x, player1->y, FALSE);
+    blit(player1->texture, player1->size, FALSE);
 }
 
 static float calculate_delta_time(void)
