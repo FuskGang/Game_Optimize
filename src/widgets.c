@@ -50,7 +50,7 @@ void do_widgets(void)
 		}
 	}
 
-	if (app.keyboard[SDL_SCANCODE_SPACE] || app.keyboard[SDL_SCANCODE_RETURN])
+	if (app.keyboard[SDL_SCANCODE_RETURN])
 	{
 		if (app.active_widget->action != NULL)
 		{
