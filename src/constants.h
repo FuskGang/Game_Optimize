@@ -11,7 +11,14 @@
 #define FONT_SIZE 16
 #define MAX_NAME_LENGTH 255
 
-#define FPS 1000
+#define FPS 60
 #define DELAY_TIME (1000 / FPS)
+
+#define G 9.8
+#define BULLET_VELOCITY 500
+
+#ifndef M_PI
+#define M_PI 3.1415926535897932384626433832795
+#endif
 
 #endif /* CONSTANTS */
