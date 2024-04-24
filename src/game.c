@@ -170,8 +170,8 @@ static void update_tank(void)
 
 static void draw(void)
 {
-    draw_player1();
     draw_pixel_map();
+    draw_player1();
     draw_stats();
 }
 
@@ -237,5 +237,5 @@ static void update_bullet(void)
 
 static void draw_bullet(Tank *player)
 {
-    blit(player->bullet.texture, player->bullet.position, 1);
+    blit(player->bullet.texture, &player->bullet.position, 1);
 }

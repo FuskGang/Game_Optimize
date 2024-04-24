@@ -62,7 +62,7 @@ static void draw(void)
 
 void draw_cursor(void)
 {
-    blit(cursorTexture, app.mouse, 1);
+    blit(cursorTexture, &app.mouse, 1);
 }
 
 static void start(void)

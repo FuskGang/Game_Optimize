@@ -7,8 +7,10 @@
 static void generate_pixel_map();
 static int get_noise(double x, double a);
 static double noise_function(double x, double a);
+static SDL_Texture *get_map_texture(void);
 
 int pixel_map[SCREEN_WIDTH][SCREEN_HEIGHT];
+static SDL_Texture *map;
 
 void init_map(void)
 {
@@ -38,6 +40,8 @@ void generate_pixel_map()
             pixel_map[pixel_x][pixel_y++] = 1;
         }
     }
+
+    map = get_map_texture();
 }
 
 static int get_noise(double x, double a)
@@ -46,6 +50,29 @@ static int get_noise(double x, double a)
     int level_noise = (int)tmp_noise;
 
     return level_noise;
+}
+
+static SDL_Texture *get_map_texture(void)
+{
+    SDL_Surface *surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
+    if (surface == NULL)
+    {
+        return NULL;
+    }
+
+    for (int y = 0; y < SCREEN_HEIGHT; y++)
+    {
+        for (int x = 0; x < SCREEN_WIDTH; x++)
+        {
+            Uint32 pixelColor = (pixel_map[x][y] == 0) ? SDL_MapRGBA(surface->format, SKY_RGBA) : SDL_MapRGBA(surface->format, GRASS_RGBA);
+            SDL_Rect pixelRect = {x, y, 1, 1};
+            SDL_FillRect(surface, &pixelRect, pixelColor);
+        }
+    }
+
+    SDL_Texture *texture = to_texture(surface, TRUE);
+
+    return texture;
 }
 
 static double noise_function(double x, double a)
@@ -58,18 +85,5 @@ static double noise_function(double x, double a)
 
 void draw_pixel_map(void)
 {
-    SDL_Rect r = {.w = 1, .h = 1};
-    SDL_SetRenderDrawColor(app.renderer, GRASS_RGBA);
-    for (int pixel_x = 0; pixel_x < SCREEN_WIDTH; pixel_x++)
-    {
-        for (int pixel_y = 0; pixel_y < SCREEN_HEIGHT; pixel_y++)
-        {
-            if (pixel_map[pixel_x][pixel_y] == 1)
-            {
-                r.x = pixel_x;
-                r.y = pixel_y;
-                SDL_RenderFillRect(app.renderer, &r);
-            }
-        }
-    }
+    blit(map, NULL, FALSE);
 }

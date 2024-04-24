@@ -33,15 +33,15 @@ SDL_Surface *load_surface(char *filename)
     return surface;
 }
 
-void blit(SDL_Texture *texture, SDL_Rect dest, int center)
+void blit(SDL_Texture *texture, SDL_Rect *dest, int center)
 {
     if (center)
     {
-        dest.x -= dest.w / 2;
-        dest.y -= dest.h / 2;
+        dest->x -= dest->w / 2;
+        dest->y -= dest->h / 2;
     }
 
-    SDL_RenderCopy(app.renderer, texture, NULL, &dest);
+    SDL_RenderCopy(app.renderer, texture, NULL, dest);
 }
 
 void blit_rotated(SDL_Texture *texture, SDL_Rect dest, int center, float angle)
