@@ -30,6 +30,7 @@ typedef struct
 typedef struct
 {
 	char player_name[255];
+	int points;
 	SDL_Texture *texture;
 	SDL_Color color;
 	SDL_Rect size;
@@ -37,10 +38,14 @@ typedef struct
 	Bullet bullet;
 	int power;
 	char is_shooting;
+	char is_hit;
+	char was_touch;
 	Uint32 shoot_time;
 	SDL_Point first_base_pixel;
 	SDL_Point second_base_pixel;
 	int degrees;
+	int cur_rad;
+	char is_cur_up;
 	/*weapon list*/
 } Tank;
 
