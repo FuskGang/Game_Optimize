@@ -3,7 +3,7 @@
 App app;
 Uint32 deltaTime;
 
-static void capFrameRate(Uint32 *then, Uint32 *deltaTime);
+static void cap_frame_rate(Uint32 *then, Uint32 *deltaTime);
 
 int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[])
 {
@@ -30,13 +30,13 @@ int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[])
 
         present_frame();
 
-        capFrameRate(&prevTime, &deltaTime);
+        cap_frame_rate(&prevTime, &deltaTime);
     }
 
     return 0;
 }
 
-static void capFrameRate(Uint32 *then, Uint32 *deltaTime)
+static void cap_frame_rate(Uint32 *then, Uint32 *deltaTime)
 {
     long wait;
 
