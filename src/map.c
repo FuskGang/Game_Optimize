@@ -4,7 +4,7 @@
 #define GRASS_RGBA 39, 136, 48, 1
 #define GEN_FUNC_A -6.0f
 
-static void generate_pixel_map();
+static void generate_pixel_map(void);
 static int get_noise(double x, double a);
 static double noise_function(double x, double a);
 static SDL_Texture *get_map_texture(void);
@@ -33,15 +33,13 @@ void generate_pixel_map()
         x += x_offset;
         int pixel_y = get_noise(x, a);
 
-        printf("%d\n", pixel_y);
-
         while (pixel_y < SCREEN_HEIGHT)
         {
             pixel_map[pixel_x][pixel_y++] = 1;
         }
     }
 
-    map = get_map_texture();
+    set_map();
 }
 
 static int get_noise(double x, double a)
@@ -50,6 +48,11 @@ static int get_noise(double x, double a)
     int level_noise = (int)tmp_noise;
 
     return level_noise;
+}
+
+void set_map(void)
+{
+    map = get_map_texture();
 }
 
 static SDL_Texture *get_map_texture(void)

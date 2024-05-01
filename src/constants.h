@@ -16,6 +16,7 @@
 
 #define G 9.8
 #define BULLET_VELOCITY 500
+#define MAX_BULLET 5
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795

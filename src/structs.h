@@ -12,6 +12,14 @@ typedef struct
 
 typedef struct
 {
+	char weapon_name[100];
+	int damage;
+	int max_radius;
+	int bullet_count;
+} Weapon;
+
+typedef struct
+{
 	int start_x, end_x;
 	int start_y, end_y;
 	int thickness, length;
@@ -23,25 +31,31 @@ typedef struct
 {
 	SDL_Texture *texture;
 	SDL_Rect position;
-	int damage;
+	char is_shoot;
+	char is_hit;
 	double angle;
+	int cur_radius;
+	char is_radius_up;
 } Bullet;
 
 typedef struct
 {
 	char player_name[255];
+	int points;
 	SDL_Texture *texture;
 	SDL_Color color;
 	SDL_Rect size;
 	Muzzle muzzle;
-	Bullet bullet;
+	Bullet bullet[MAX_BULLET];
+	Weapon curr_weapon;
+	Weapon weapons[3];
 	int power;
-	char is_shooting;
+	char is_touched;
 	Uint32 shoot_time;
 	SDL_Point first_base_pixel;
 	SDL_Point second_base_pixel;
 	int degrees;
-	/*weapon list*/
+	char is_shoot;
 } Tank;
 
 typedef struct Widget
