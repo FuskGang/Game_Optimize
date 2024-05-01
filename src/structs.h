@@ -46,7 +46,7 @@ typedef struct
 	SDL_Color color;
 	SDL_Rect size;
 	Muzzle muzzle;
-	Bullet bullet[10];
+	Bullet bullet[MAX_BULLET];
 	Weapon curr_weapon;
 	Weapon weapons[3];
 	int power;

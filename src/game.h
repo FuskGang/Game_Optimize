@@ -1,6 +1,5 @@
 #ifndef GAME
 #define GAME
-#define MAX_BULLET 5
 #define TANK_SIZE_W 60
 #define TANK_SIZE_H 18
 #define TANK_POWER 10

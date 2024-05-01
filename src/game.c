@@ -300,7 +300,7 @@ static void draw_player(Tank *player)
 {
     if (player->size.y + player->size.h > SCREEN_HEIGHT)
     {
-        player->size.y = player->size.y + player->size.h;
+        player->size.y = SCREEN_HEIGHT - player->size.h;
     }
 
     blit_rotated(player->texture, player->size, FALSE, player->degrees);
