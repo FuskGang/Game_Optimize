@@ -1,5 +1,15 @@
 #ifndef GAME
 #define GAME
+#define MAX_BULLET 5
+#define TANK_SIZE_W 60
+#define TANK_SIZE_H 18
+#define TANK_POWER 10
+#define MUZZLE_LENGTH 30
+#define MUZZLE_THICKNESS 3
+#define MUZZLE_DEGREES 0
+#define BULLET_W 10
+#define BULLET_H 10
+#define POWER 60
 
 #include "common.h"
 #include "menu.h"
@@ -10,9 +20,9 @@
 
 typedef enum
 {
-    NO_COLLISION,
-    EARTH_COLLISION,
-    TANK_COLLISION
+    COLLISION_NONE,
+    COLLISION_EARTH,
+    COLLISION_TANK
 } collision;
 
 void init_game(void);

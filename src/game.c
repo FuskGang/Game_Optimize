@@ -3,13 +3,12 @@
 static void update(void);
 static void draw(void);
 static void init_player(void);
-static void get_player(Tank *, char *,
-                       int, int, int,
-                       int, int, int, int,
-                       int, int, int,
-                       char *, int, int, int, int, int,
-                       int, char *);
-static void get_weapon(Weapon *, char *, int, int, int);
+static void get_player(Tank *player, char *name,
+                       int player_r, int player_g, int player_b,
+                       int size_x, int size_y,
+                       char *bullet_texture_path, int bullet_r, int bullet_g, int bullet_b,
+                       char *player_texture_path);
+static void get_weapon(Weapon *weapon, char *name, int damage, int max_radius, int bullet_count);
 static void drop_player(Tank *);
 static void draw_player(Tank *);
 static float calculate_delta_time(void);
@@ -49,17 +48,15 @@ static void init_player(void)
 
     get_player(player1, "Test",
                255, 255, 0,
-               100, 0, 60, 18,
-               30, 3, 0,
-               "assets/Bullet2.png", 10, 10, 255, 0, 0,
-               60, "assets/Tank.png");
+               100, 0,
+               "assets/Bullet2.png", 255, 0, 0,
+               "assets/Tank.png");
 
     get_player(player2, "Test2",
-               255, 0, 255,
-               SCREEN_WIDTH - 800, 0, 60, 18,
-               30, 3, 0,
-               "assets/Bullet2.png", 10, 10, 255, 0, 0,
-               60, "assets/Tank.png");
+               46, 218, 255,
+               SCREEN_WIDTH - 800, 0,
+               "assets/Bullet2.png", 255, 0, 0,
+               "assets/Tank.png");
 
     drop_player(player1);
     drop_player(player2);
@@ -67,10 +64,9 @@ static void init_player(void)
 
 static void get_player(Tank *player, char *name,
                        int player_r, int player_g, int player_b,
-                       int size_x, int size_y, int size_w, int size_h,
-                       int muzzle_length, int muzzle_thickness, int muzzle_degrees,
-                       char *bullet_texture_path, int bullet_w, int bullet_h, int bullet_r, int bullet_g, int bullet_b,
-                       int power, char *player_texture_path)
+                       int size_x, int size_y,
+                       char *bullet_texture_path, int bullet_r, int bullet_g, int bullet_b,
+                       char *player_texture_path)
 {
     SDL_Surface *bullet_surface = load_surface(bullet_texture_path);
     SDL_SetSurfaceColorMod(bullet_surface, bullet_r, bullet_g, bullet_b);
@@ -88,35 +84,35 @@ static void get_player(Tank *player, char *name,
 
     player->size.x = size_x;
     player->size.y = size_y;
-    player->size.w = size_w;
-    player->size.h = size_h;
+    player->size.w = TANK_SIZE_W;
+    player->size.h = TANK_SIZE_H;
 
-    player->muzzle.length = muzzle_length;
-    player->muzzle.thickness = muzzle_thickness;
-    player->muzzle.degrees = muzzle_degrees;
+    player->muzzle.length = MUZZLE_LENGTH;
+    player->muzzle.thickness = MUZZLE_THICKNESS;
+    player->muzzle.degrees = MUZZLE_DEGREES;
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < MAX_BULLET; i++)
     {
         player->bullet[i].texture = bullet_texture;
-        player->bullet[i].position.w = bullet_w;
-        player->bullet[i].position.h = bullet_h;
-        player->bullet[i].is_cur_up = 0;
-        player->bullet[i].cur_rad = 0;
+        player->bullet[i].position.w = BULLET_W;
+        player->bullet[i].position.h = BULLET_H;
+        player->bullet[i].is_radius_up = 0;
+        player->bullet[i].cur_radius = 0;
         player->bullet[i].is_hit = 0;
         player->bullet[i].is_shoot = 0;
     }
 
-    player->power = power;
+    player->power = POWER;
     player->texture = player_texture;
     player->points = 0;
-    player->was_touch = 0;
-    player->was_shoot = 0;
+    player->is_touched = 0;
+    player->is_shoot = 0;
 
-    get_weapon(&player->list_weapon[0], "Default", 10, 50, 1);
-    get_weapon(&player->list_weapon[1], "Deagle", 35, 25, 1);
-    get_weapon(&player->list_weapon[2], "Minigun", 5, 12, 3);
+    get_weapon(&player->weapons[0], "Default", 10, 40, 1);
+    get_weapon(&player->weapons[1], "Deagle", 35, 25, 1);
+    get_weapon(&player->weapons[2], "Minigun", 5, 12, 5);
 
-    player->curr_weapon = player->list_weapon[0];
+    player->curr_weapon = player->weapons[0];
 }
 
 static void get_weapon(Weapon *weapon, char *weapon_name, int damage, int max_radius, int bullet_count)
@@ -167,14 +163,14 @@ static void do_input(Tank *player)
         init_menu();
     }
 
-    if (player->was_shoot)
+    if (player->is_shoot)
     {
         return;
     }
 
     if (app.keyboard[SDL_SCANCODE_SPACE])
     {
-        player->was_shoot = 1;
+        player->is_shoot = 1;
 
         for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.bullet_count; curr_bull_ind++)
         {
@@ -189,17 +185,17 @@ static void do_input(Tank *player)
 
     if (app.keyboard[SDL_SCANCODE_1])
     {
-        player->curr_weapon = player->list_weapon[0];
+        player->curr_weapon = player->weapons[0];
     }
 
     if (app.keyboard[SDL_SCANCODE_2])
     {
-        player->curr_weapon = player->list_weapon[1];
+        player->curr_weapon = player->weapons[1];
     }
 
     if (app.keyboard[SDL_SCANCODE_3])
     {
-        player->curr_weapon = player->list_weapon[2];
+        player->curr_weapon = player->weapons[2];
     }
 
     if (app.keyboard[SDL_SCANCODE_RIGHT])
@@ -251,7 +247,7 @@ static void update(void)
 
 static void update_tank(Tank *player)
 {
-    char is_tank_shoot = 0, is_tank_hit = 0;
+    char is_tank_shoot = 0;
 
     for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.bullet_count; curr_bull_ind++)
     {
@@ -274,12 +270,12 @@ static void update_tank(Tank *player)
         }
     }
 
-    if (player->was_shoot == 1)
+    if (player->is_shoot)
     {
-        if (is_tank_shoot == 0 && is_tank_hit == 0)
+        if (is_tank_shoot == 0)
         {
-            player->was_shoot = 0;
-            player->was_touch = 0;
+            player->is_shoot = 0;
+            player->is_touched = 0;
             swap_player();
         }
     }
@@ -302,6 +298,11 @@ static void draw(void)
 
 static void draw_player(Tank *player)
 {
+    if (player->size.y + player->size.h > SCREEN_HEIGHT)
+    {
+        player->size.y = player->size.y + player->size.h;
+    }
+
     blit_rotated(player->texture, player->size, FALSE, player->degrees);
     thickLineRGBA(app.renderer,
                   player->muzzle.start_x,
@@ -352,7 +353,7 @@ static void draw_stats(Tank *player)
     draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
     draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
 
-    if (player->was_touch)
+    if (player->is_touched)
     {
         draw_text(damage, other_player->size.x + 20, other_player->size.y - 20, player->color.r, player->color.g, player->color.b);
     }
@@ -361,7 +362,7 @@ static void draw_stats(Tank *player)
 static void update_bullet(Tank *player, int bullet_ind)
 {
     collision col = check_earth_collision(player->bullet[bullet_ind]);
-    if (col == EARTH_COLLISION || col == TANK_COLLISION)
+    if (col == COLLISION_EARTH || col == COLLISION_TANK)
     {
         player->bullet[bullet_ind].is_shoot = 0;
         player->bullet[bullet_ind].is_hit = 1;
@@ -373,46 +374,56 @@ static void update_bullet(Tank *player, int bullet_ind)
     double x = speed_up * player->power * t * cos(player->muzzle.angle);
     double y = speed_up * player->power * t * sin(player->muzzle.angle) + speed_up * 0.5 * G * t * t;
 
-    player->bullet[bullet_ind].position.x = player->muzzle.end_x + x + bullet_ind * 10;
-    player->bullet[bullet_ind].position.y = player->muzzle.end_y + y + bullet_ind * 7;
+    player->bullet[bullet_ind].position.x = player->muzzle.end_x + x + bullet_ind * 13;
+    player->bullet[bullet_ind].position.y = player->muzzle.end_y + y + bullet_ind * 5;
 }
 
 static void update_hit(Tank *player, int bullet_ind)
 {
-    if (player->bullet[bullet_ind].is_cur_up == 0)
+    if (player->bullet[bullet_ind].is_radius_up == 0)
     {
-        player->bullet[bullet_ind].cur_rad++;
+        player->bullet[bullet_ind].cur_radius++;
     }
 
     else
     {
-        player->bullet[bullet_ind].cur_rad--;
+        player->bullet[bullet_ind].cur_radius--;
     }
 
-    if (player->bullet[bullet_ind].cur_rad == player->curr_weapon.max_radius)
+    if (player->bullet[bullet_ind].cur_radius == player->curr_weapon.max_radius)
     {
         if (check_tank_collision(other_player,
                                  player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
                                  player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
-                                 player->bullet[bullet_ind].cur_rad) == TANK_COLLISION)
+                                 player->bullet[bullet_ind].cur_radius) == COLLISION_TANK)
         {
             player->points += player->curr_weapon.damage;
-            player->was_touch = 1;
+            player->is_touched = 1;
             drop_player(other_player);
+        }
+
+        if (check_tank_collision(curr_player,
+                                 player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
+                                 player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
+                                 player->bullet[bullet_ind].cur_radius) == COLLISION_TANK)
+        {
+            other_player->points += other_player->curr_weapon.damage;
+            player->is_touched = 1;
+            drop_player(curr_player);
         }
 
         drop_earth(player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
                    player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
-                   player->bullet[bullet_ind].cur_rad);
+                   player->bullet[bullet_ind].cur_radius);
 
-        player->bullet[bullet_ind].is_cur_up = 1;
+        player->bullet[bullet_ind].is_radius_up = 1;
     }
 
-    if (player->bullet[bullet_ind].cur_rad == -1)
+    if (player->bullet[bullet_ind].cur_radius == -1)
     {
         player->bullet[bullet_ind].is_hit = 0;
-        player->bullet[bullet_ind].cur_rad = 0;
-        player->bullet[bullet_ind].is_cur_up = 0;
+        player->bullet[bullet_ind].cur_radius = 0;
+        player->bullet[bullet_ind].is_radius_up = 0;
     }
 }
 
@@ -421,9 +432,9 @@ static void draw_hit(Tank *player, int bullet_ind)
     filledCircleRGBA(app.renderer,
                      player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
                      player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
-                     player->bullet[bullet_ind].cur_rad,
+                     player->bullet[bullet_ind].cur_radius,
                      255,
-                     141 + player->bullet[bullet_ind].cur_rad,
+                     141 + player->bullet[bullet_ind].cur_radius,
                      27, 255);
 }
 
@@ -435,11 +446,11 @@ static void draw_bullet(Tank *player, int bullet_ind)
 static void drop_earth(int x, int y, int r)
 {
     double d;
-    for (int x_map = x - r; x_map <= x + r; x_map++)
-    {
-        for (int y_map = y - r; y_map <= y + r; y_map++)
-        {
 
+    for (int x_map = (x - r); x_map <= (x + r); x_map++)
+    {
+        for (int y_map = (y - r); y_map <= (y + r); y_map++)
+        {
             if (x_map < 0 || y_map < 0)
             {
                 continue;
@@ -447,12 +458,12 @@ static void drop_earth(int x, int y, int r)
 
             if (x_map > SCREEN_WIDTH)
             {
-                x_map = SCREEN_WIDTH - 1;
+                continue;
             }
 
             if (y_map > SCREEN_HEIGHT)
             {
-                y_map = SCREEN_HEIGHT - 1;
+                continue;
             }
 
             d = SDL_sqrt((SDL_pow((double)(x - x_map), 2.0f) + SDL_pow((double)(y - y_map), 2.0f)));
@@ -484,23 +495,28 @@ static collision check_tank_collision(Tank *player, int x, int y, int r)
 
     if (d1 <= d_r || d2 <= d_r || d3 <= d_r || d4 <= d_r)
     {
-        return TANK_COLLISION;
+        return COLLISION_TANK;
     }
 
-    return NO_COLLISION;
+    return COLLISION_NONE;
 }
 
 static collision check_earth_collision(Bullet bullet)
 {
+    if (bullet.position.y > SCREEN_HEIGHT)
+    {
+        return COLLISION_EARTH;
+    }
+
     if (bullet.position.x < 0 || bullet.position.x > SCREEN_WIDTH)
     {
-        return EARTH_COLLISION;
+        return COLLISION_EARTH;
     }
 
     if (bullet.position.y >= 0 && bullet.position.y < SCREEN_HEIGHT &&
         pixel_map[(bullet.position.x) % SCREEN_WIDTH][(bullet.position.y + bullet.position.h) % SCREEN_HEIGHT] == 1)
     {
-        return EARTH_COLLISION;
+        return COLLISION_EARTH;
     }
 
     if (bullet.position.x >= other_player->size.x && 
@@ -508,10 +524,10 @@ static collision check_earth_collision(Bullet bullet)
         bullet.position.y >= other_player->size.y &&
         bullet.position.y <= (other_player->size.y + other_player->size.h))
     {
-        return TANK_COLLISION;
+        return COLLISION_TANK;
     }
 
-    return NO_COLLISION;
+    return COLLISION_NONE;
 }
 
 static void swap_player(void)

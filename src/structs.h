@@ -34,8 +34,8 @@ typedef struct
 	char is_shoot;
 	char is_hit;
 	double angle;
-	int cur_rad;
-	char is_cur_up;
+	int cur_radius;
+	char is_radius_up;
 } Bullet;
 
 typedef struct
@@ -46,16 +46,16 @@ typedef struct
 	SDL_Color color;
 	SDL_Rect size;
 	Muzzle muzzle;
-	Bullet bullet[3];
+	Bullet bullet[10];
 	Weapon curr_weapon;
-	Weapon list_weapon[3];
+	Weapon weapons[3];
 	int power;
-	char was_touch;
+	char is_touched;
 	Uint32 shoot_time;
 	SDL_Point first_base_pixel;
 	SDL_Point second_base_pixel;
 	int degrees;
-	char was_shoot;
+	char is_shoot;
 } Tank;
 
 typedef struct Widget
