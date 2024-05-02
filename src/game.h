@@ -29,10 +29,11 @@ typedef enum
 
 typedef enum
 {
-    DAMAGE_TO_NONE,
-    DAMAGE_TO_OTHER,
-    DAMAGE_TO_CURRENT
-} damage_to;
+    DAMAGE_TARGET_NONE,
+    DAMAGE_TARGET_OTHER,
+    DAMAGE_TARGET_CURRENT,
+    DAMAGE_TARGET_BOTH
+} damage_target;
 
 void init_game(void);
 

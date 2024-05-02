@@ -37,7 +37,7 @@ typedef struct
 	char is_shoot;
 	char is_hit;
 	double angle;
-	int cur_radius;
+	int curr_radius;
 	char is_radius_up;
 } Bullet;
 
@@ -53,7 +53,7 @@ typedef struct
 	Weapon curr_weapon;
 	Weapon weapons[3];
 	int power;
-	char damage_to;
+	char damage_target;
 	Uint32 touch_time;
 	Uint32 input_time;
 	Uint32 last_shoot_time;
