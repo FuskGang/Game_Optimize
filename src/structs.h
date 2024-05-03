@@ -34,6 +34,7 @@ typedef struct
 	SDL_Texture *texture;
 	SDL_Rect position;
 	Uint32 shoot_time;
+	Uint32 radius_time;
 	char is_shoot;
 	char is_hit;
 	double angle;
@@ -82,6 +83,7 @@ typedef struct
 	SDL_Rect mouse;
 	int keyboard[MAX_KEYBOARD_KEYS];
 	Widget *active_widget;
+	int fps;
 } App;
 
 #endif /* STRUCTS */

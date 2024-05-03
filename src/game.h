@@ -10,8 +10,9 @@
 #define BULLET_H 10
 #define POWER 60
 #define DELAY_POINTS 1000
-#define DELAY_INPUT 5000
-#define DELAY_BETWEEN_BULLET 500
+#define DELAY_RADIUS 20
+#define DELAY_INPUT 15
+#define DELAY_BETWEEN_BULLET 100
 
 #include "common.h"
 #include "menu.h"
