@@ -63,7 +63,7 @@ typedef struct
 	char is_shoot;
 } Tank;
 
-typedef struct
+typedef struct Widget
 {
 	char name[MAX_NAME_LENGTH];
 	int x;
