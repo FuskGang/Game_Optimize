@@ -371,20 +371,18 @@ static float calculate_delta_time(void)
 
 static void draw_stats(Tank *player)
 {
-    char angle[100], power[100], points[100], damage[100], weapon[255], fps[100];
+    char angle[100], power[100], points[100], damage[100], weapon[255];
 
     sprintf(angle, "Current angle: %d", player->muzzle.degrees % 360);
     sprintf(power, "Current power: %d", player->power);
     sprintf(points, "Current points: %d", player->points);
     sprintf(weapon, "Current weapon: %s", player->curr_weapon.weapon_name);
-    sprintf(fps, "Current FPS: %d", app.fps);
     sprintf(damage, "+%d", player->curr_weapon.damage);
 
     draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
     draw_text(angle, 50, 50, player->color.r, player->color.g, player->color.b);
     draw_text(power, 50, 80, player->color.r, player->color.g, player->color.b);
     draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
-    draw_text(fps, 50, 140, 255, 255, 255);
 
     if (player->damage_target == DAMAGE_TARGET_OTHER || player->damage_target == DAMAGE_TARGET_BOTH)
     {

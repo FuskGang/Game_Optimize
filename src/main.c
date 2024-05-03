@@ -1,9 +1,9 @@
 #include "main.h"
 
 App app;
-Uint32 deltaTime;
-int frameCount = 0;
-Uint32 lastTime;
+Uint32 delta_time;
+int frame_count = 0;
+Uint32 last_time;
 
 static void cap_frame_rate(Uint32 *then, Uint32 *deltaTime);
 
@@ -18,11 +18,11 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     init_fonts();
 
     init_widgets();
-
+    
     init_menu();
 
-    Uint32 prevTime = 0;
-    lastTime = SDL_GetTicks();
+    Uint32 prev_time = 0;
+    last_time = SDL_GetTicks();
     while (TRUE)
     {
         prepare_frame();
@@ -33,21 +33,21 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
         present_frame();
 
-        cap_frame_rate(&prevTime, &deltaTime);
+        cap_frame_rate(&prev_time, &delta_time);
     }
 
     return 0;
 }
 
-static void cap_frame_rate(Uint32 *then, Uint32 *deltaTime)
+static void cap_frame_rate(Uint32 *then, Uint32 *delta_time)
 {
     long wait;
 
     wait = DELAY_TIME;
 
-    *deltaTime = SDL_GetTicks() - *then;
+    *delta_time = SDL_GetTicks() - *then;
 
-    wait -= *deltaTime;
+    wait -= *delta_time;
 
     if (wait < 1)
     {
@@ -56,13 +56,13 @@ static void cap_frame_rate(Uint32 *then, Uint32 *deltaTime)
 
     SDL_Delay(wait);
 
-    Uint32 currentTime = SDL_GetTicks();
-    frameCount++;
-    if (currentTime > lastTime + 1000)
+    Uint32 current_time = SDL_GetTicks();
+    frame_count++;
+    if (current_time > last_time + 1000)
     {
-        app.fps = frameCount * 1000.0f / (currentTime - lastTime);
-        lastTime = currentTime;
-        frameCount = 0;
+        app.fps = frame_count * 1000.0f / (current_time - last_time);
+        last_time = current_time;
+        frame_count = 0;
     }
 
     *then = SDL_GetTicks();

@@ -11,7 +11,7 @@
 #define FONT_SIZE 16
 #define MAX_NAME_LENGTH 255
 
-#define FPS ПОХУЙ_ЛЮБОЕ_СТАВЬ
+#define FPS 60
 #define DELAY_TIME (1000 / FPS)
 
 #define G 9.8
