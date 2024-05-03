@@ -15,7 +15,9 @@ typedef struct
 	char weapon_name[100];
 	int damage;
 	int max_radius;
-	int bullet_count;
+	int max_bullet_count;
+	int current_bullet_count;
+	int hit_bullet_count;
 } Weapon;
 
 typedef struct
@@ -31,10 +33,12 @@ typedef struct
 {
 	SDL_Texture *texture;
 	SDL_Rect position;
+	Uint32 shoot_time;
+	Uint32 radius_time;
 	char is_shoot;
 	char is_hit;
 	double angle;
-	int cur_radius;
+	int curr_radius;
 	char is_radius_up;
 } Bullet;
 
@@ -50,8 +54,10 @@ typedef struct
 	Weapon curr_weapon;
 	Weapon weapons[3];
 	int power;
-	char is_touched;
-	Uint32 shoot_time;
+	char damage_target;
+	Uint32 touch_time;
+	Uint32 input_time;
+	Uint32 last_shoot_time;
 	SDL_Point first_base_pixel;
 	SDL_Point second_base_pixel;
 	int degrees;
@@ -77,6 +83,7 @@ typedef struct
 	SDL_Rect mouse;
 	int keyboard[MAX_KEYBOARD_KEYS];
 	Widget *active_widget;
+	int fps;
 } App;
 
 #endif /* STRUCTS */

@@ -9,6 +9,10 @@
 #define BULLET_W 10
 #define BULLET_H 10
 #define POWER 60
+#define DELAY_POINTS 1000
+#define DELAY_RADIUS 50
+#define DELAY_INPUT 15
+#define DELAY_BETWEEN_BULLET 100
 
 #include "common.h"
 #include "menu.h"
@@ -23,6 +27,14 @@ typedef enum
     COLLISION_EARTH,
     COLLISION_TANK
 } collision;
+
+typedef enum
+{
+    DAMAGE_TARGET_NONE,
+    DAMAGE_TARGET_OTHER,
+    DAMAGE_TARGET_CURRENT,
+    DAMAGE_TARGET_BOTH
+} damage_target;
 
 void init_game(void);
 
