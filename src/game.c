@@ -158,6 +158,13 @@ static void drop_player(Tank *player)
     }
 
     player->degrees = get_angle(player->first_base_pixel.x, player->first_base_pixel.y, player->second_base_pixel.x, player->second_base_pixel.y) % 180 - 90;
+
+    SDL_Point center = {player->size.x + player->size.w / 2, player->size.y + player->size.h};
+
+    rotate_point(player->size.x, player->size.y, center.x, center.y, player->degrees, &player->bounding_box[0].x, &player->bounding_box[0].y);
+    rotate_point(player->size.x + player->size.w, player->size.y, center.x, center.y, player->degrees, &player->bounding_box[1].x, &player->bounding_box[1].y);
+    rotate_point(player->size.x + player->size.w, player->size.y + player->size.h, center.x, center.y, player->degrees, &player->bounding_box[2].x, &player->bounding_box[2].y);
+    rotate_point(player->size.x, player->size.y + player->size.h, center.x, center.y, player->degrees, &player->bounding_box[3].x, &player->bounding_box[3].y);
 }
 
 static void do_input(Tank *player)
@@ -176,7 +183,7 @@ static void do_input(Tank *player)
     if ((SDL_GetTicks() - player->input_time < DELAY_INPUT))
     {
         return;
-    } 
+    }
 
     if (app.keyboard[SDL_SCANCODE_SPACE])
     {
@@ -359,6 +366,11 @@ static void draw_player(Tank *player)
     {
         player->size.y = SCREEN_HEIGHT - player->size.h;
     }
+
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[0].x, player->bounding_box[0].y, player->bounding_box[1].x, player->bounding_box[1].y);
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[1].x, player->bounding_box[1].y, player->bounding_box[2].x, player->bounding_box[2].y);
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[2].x, player->bounding_box[2].y, player->bounding_box[3].x, player->bounding_box[3].y);
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[3].x, player->bounding_box[3].y, player->bounding_box[0].x, player->bounding_box[0].y);
 
     blit_rotated(player->texture, player->size, FALSE, player->degrees);
     thickLineRGBA(app.renderer,
