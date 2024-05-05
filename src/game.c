@@ -261,11 +261,20 @@ static void update(void)
 
 static void update_tank(Tank *player)
 {
+    player->muzzle.start_x = player->size.x + player->size.w / 2;
+    player->muzzle.start_y = player->size.y + player->size.h / 4;
+    player->muzzle.angle = (player->muzzle.degrees - 90) * M_PI / 180;
+    player->muzzle.end_x = player->muzzle.start_x + player->muzzle.length * cos(player->muzzle.angle);
+    player->muzzle.end_y = player->muzzle.start_y + player->muzzle.length * sin(player->muzzle.angle);
+
     char is_tank_shoot = 0;
+
+    if (!player->is_shoot)
+        return;
 
     for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
     {
-        if (player->is_shoot && (player->curr_weapon.current_bullet_count != player->curr_weapon.max_bullet_count) &&
+        if (player->curr_weapon.current_bullet_count != player->curr_weapon.max_bullet_count &&
             !player->bullet[curr_bull_ind].is_shoot && !player->bullet[curr_bull_ind].is_hit)
         {
             if ((SDL_GetTicks() - player->last_shoot_time) < DELAY_BETWEEN_BULLET && player->last_shoot_time != 0)
@@ -277,6 +286,8 @@ static void update_tank(Tank *player)
             player->bullet[curr_bull_ind].is_shoot = 1;
             player->bullet[curr_bull_ind].angle = player->muzzle.angle;
             player->bullet[curr_bull_ind].shoot_time = SDL_GetTicks();
+            player->bullet[curr_bull_ind].position.x = player->muzzle.end_x;
+            player->bullet[curr_bull_ind].position.y = player->muzzle.end_y;
             player->last_shoot_time = SDL_GetTicks();
         }
 
@@ -291,15 +302,9 @@ static void update_tank(Tank *player)
             is_tank_shoot = 1;
             update_hit(player, curr_bull_ind);
         }
-
-        else
-        {
-            player->bullet[curr_bull_ind].position.x = player->muzzle.end_x;
-            player->bullet[curr_bull_ind].position.y = player->muzzle.end_y;
-        }
     }
 
-    if (player->is_shoot && player->curr_weapon.hit_bullet_count == player->curr_weapon.max_bullet_count)
+    if (player->curr_weapon.hit_bullet_count == player->curr_weapon.max_bullet_count)
     {
         if (is_tank_shoot == 0)
         {
@@ -313,13 +318,6 @@ static void update_tank(Tank *player)
             }
         }
     }
-
-
-    player->muzzle.start_x = player->size.x + player->size.w / 2;
-    player->muzzle.start_y = player->size.y + player->size.h / 4;
-    player->muzzle.angle = (player->muzzle.degrees - 90) * M_PI / 180;
-    player->muzzle.end_x = player->muzzle.start_x + player->muzzle.length * cos(player->muzzle.angle);
-    player->muzzle.end_y = player->muzzle.start_y + player->muzzle.length * sin(player->muzzle.angle);
 }
 
 static void draw(void)
