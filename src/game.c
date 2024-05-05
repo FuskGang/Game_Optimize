@@ -129,6 +129,7 @@ static void get_weapon(Weapon *weapon, char *weapon_name, int damage, int max_ra
 
 static void drop_player(Tank *player)
 {
+    player->size.y = 0;
     int is_ground = 0;
     while (!is_ground)
     {
@@ -247,6 +248,26 @@ static void do_input(Tank *player)
             player->power -= 1;
         }
     }
+
+    if (app.keyboard[SDL_SCANCODE_Z])
+    {
+        player->input_time = SDL_GetTicks();
+
+        if (player->size.x > 1)
+        {
+            player->size.x -= 1;
+        }
+    }
+
+    if (app.keyboard[SDL_SCANCODE_X])
+    {
+        player->input_time = SDL_GetTicks();
+
+        if (player->size.x + player->size.w < SCREEN_WIDTH)
+        {
+            player->size.x += 1;
+        }
+    }
 }
 
 static void update(void)
@@ -266,6 +287,11 @@ static void update_tank(Tank *player)
     player->muzzle.angle = (player->muzzle.degrees - 90) * M_PI / 180;
     player->muzzle.end_x = player->muzzle.start_x + player->muzzle.length * cos(player->muzzle.angle);
     player->muzzle.end_y = player->muzzle.start_y + player->muzzle.length * sin(player->muzzle.angle);
+
+    if (player->bounding_box[0].x != player->size.x)
+    {
+        drop_player(player);
+    }
 
     char is_tank_shoot = 0;
 
@@ -296,7 +322,6 @@ static void update_tank(Tank *player)
             is_tank_shoot = 1;
             update_bullet(player, curr_bull_ind);
         }
-
         else if (player->bullets[curr_bull_ind].is_hit)
         {
             is_tank_shoot = 1;
