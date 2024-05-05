@@ -30,4 +30,5 @@ void draw_text(char *text, int x, int y, int r, int g, int b)
 	SDL_Texture *text_texture = get_text_texture(text, &dest.w, &dest.h);
 	SDL_SetTextureColorMod(text_texture, r, g, b);
 	SDL_RenderCopy(app.renderer, text_texture, NULL, &dest);
+	SDL_DestroyTexture(text_texture);
 }
