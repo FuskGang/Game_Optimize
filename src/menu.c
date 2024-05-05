@@ -4,6 +4,7 @@ static void update(void);
 static void draw(void);
 static void draw_cursor(void);
 static void start(void);
+static void about(void);
 static void quit(void);
 
 static SDL_Texture *cursorTexture;
@@ -14,31 +15,39 @@ void init_menu(void)
 
     Widget *w;
 	int x;
+	int y;
 
 	x = 500;
+	y = 200;
 
 	w = create_widget("start");
 	w->x = x;
-	w->y = 200;
-	strcpy(w->label, "Start");
+	w->y = y + 0;
+	strcpy(w->label, "Играть");
 	w->action = &start;
 
 	app.active_widget = w;
 
-	w = create_widget("options");
+	w = create_widget("leaderboard");
 	w->x = x;
-	w->y = 250;
-	strcpy(w->label, "Options");
+	w->y = y + 50;
+	strcpy(w->label, "Таблица лидеров");
 
-	w = create_widget("credits");
+	w = create_widget("help");
 	w->x = x;
-	w->y = 300;
-	strcpy(w->label, "Credits");
+	w->y = y + 100;
+	strcpy(w->label, "Справка");
+
+	w = create_widget("about");
+	w->x = x;
+	w->y = y + 150;
+	strcpy(w->label, "О программе");
+	w->action = about;
 
 	w = create_widget("exit");
 	w->x = x;
-	w->y = 350;
-	strcpy(w->label, "Exit");
+	w->y = y + 200;
+	strcpy(w->label, "Выход");
 	w->action = quit;
 
 	app.delegate.update = &update;
@@ -68,6 +77,11 @@ void draw_cursor(void)
 static void start(void)
 {
 	init_game();
+}
+
+static void about(void)
+{
+	init_about();
 }
 
 static void quit(void)
