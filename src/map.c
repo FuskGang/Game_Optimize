@@ -52,6 +52,7 @@ static int get_noise(double x, double a)
 
 void set_map(void)
 {
+    SDL_DestroyTexture(map);
     map = get_map_texture();
 }
 
