@@ -12,7 +12,8 @@ static void get_weapon(Weapon *weapon, char *name, int damage, int max_radius, i
 static void drop_player(Tank *);
 static void draw_player(Tank *);
 static void draw_stats(Tank *);
-static void do_input(Tank *);
+static void do_human_input(Tank *);
+static void do_bot_input(Tank *);
 static void update_bullet(Tank *, int);
 static void update_tank(Tank *);
 static void update_hit(Tank *, int);
@@ -59,7 +60,7 @@ static void init_player(void)
                "assets/Bullet2.png", 255, 0, 0,
                "assets/Tank.png");
 
-    player1->is_bot = SDL_FALSE;
+    player1->is_bot = SDL_TRUE;
     player2->is_bot = SDL_TRUE;
 
     drop_player(player1);
@@ -163,7 +164,7 @@ static void drop_player(Tank *player)
     player->degrees = get_angle(player->first_base_pixel.x, player->first_base_pixel.y, player->second_base_pixel.x, player->second_base_pixel.y) % 180 - 90;
 }
 
-static void do_input(Tank *player)
+static void do_human_input(Tank *player)
 {
     if (app.keyboard[SDL_SCANCODE_ESCAPE])
     {
@@ -176,7 +177,7 @@ static void do_input(Tank *player)
         return;
     }
 
-    if ((SDL_GetTicks() - player->input_time < DELAY_INPUT))
+    if ((SDL_GetTicks() - player->input_time < DELAY_HUMAN_INPUT))
     {
         return;
     } 
@@ -252,25 +253,115 @@ static void do_input(Tank *player)
         }
     }
 
-    if (app.keyboard[SDL_SCANCODE_B])
+    // if (app.keyboard[SDL_SCANCODE_B])
+    // {
+    //     if (test_shoot() == SDL_FALSE)
+    //     {
+    //         player->muzzle.degrees += 1;
+
+    //         if (player->muzzle.degrees < 0)
+    //         {
+    //             player->muzzle.degrees += 360;
+    //         }
+    //     }
+    // }
+}
+
+static void do_bot_input(Tank *player)
+{
+    SDL_bool is_success_shoot;
+
+    if (app.keyboard[SDL_SCANCODE_ESCAPE])
     {
-        if (test_shoot() == SDL_FALSE)
+        app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
+        init_menu();
+    }
+
+    if (player->is_shoot)
+    {
+        return;
+    }
+
+    if ((SDL_GetTicks() - player->input_time < DELAY_BOT_INPUT))
+    {
+        return;
+    }
+
+    is_success_shoot = test_shoot();
+
+    if (player->power < 50)
+    {
+        player->input_time = SDL_GetTicks();
+
+        if (player->power < 100)
         {
+            player->power += 1;
+        }
+
+        return;
+    }
+
+    if (player->power > 80)
+    {
+        player->input_time = SDL_GetTicks();
+
+        if (player->power > 1)
+        {
+            player->power -= 1;
+        }
+
+        return;
+    }
+
+    if (!is_success_shoot)
+    {
+        if (other_player->size.x > curr_player->size.x)
+        {
+            player->input_time = SDL_GetTicks();
+
             player->muzzle.degrees += 1;
+
+            if (player->muzzle.degrees > 359)
+            {
+                player->muzzle.degrees -= 360;
+            }
+        }
+
+        else
+        {
+            player->input_time = SDL_GetTicks();
+
+            player->muzzle.degrees -= 1;
 
             if (player->muzzle.degrees < 0)
             {
                 player->muzzle.degrees += 360;
             }
         }
+
+        return;
     }
-}
+
+    if (is_success_shoot)
+    {
+        player->is_shoot = 1;
+        return;
+    }
+}   
 
 static void update(void)
 {
     delta_time = calculate_delta_time();
 
-    do_input(curr_player);
+    if (curr_player->is_bot)
+    {
+        do_bot_input(curr_player);
+    }
+
+    else
+    {
+        do_human_input(curr_player);
+    }
 
     update_tank(player1);
     update_tank(player2);
@@ -553,8 +644,7 @@ static SDL_bool test_shoot(void)
     test_bullet.position.h = 10;
     test_bullet.position.w = 10;
 
-
-    for (double t = 0.0f; t < 30.0f; t = t + 0.09)
+    for (double t = 0.0f; t < 30.0f; t = t + 0.00001)
     {
         if (check_earth_collision(test_bullet) == COLLISION_EARTH || check_earth_collision(test_bullet) == COLLISION_TANK)
         {
@@ -593,20 +683,20 @@ static collision check_tank_collision(Tank *player, int x, int y, int r)
     double d4 = SDL_sqrt((SDL_pow((double)(x - w4[0]), 2.0f) + SDL_pow((double)(y - w4[1]), 2.0f)));
     double d_r = (double)(r);
 
-    if (d1 <= d_r || d2 <= d_r || d3 <= d_r || d4 <= d_r)
+    if (d1 < d_r || d2 < d_r || d3 < d_r || d4 < d_r)
     {
         return COLLISION_TANK;
     }
 
-    if (x >= w1[0] && x <= w4[0] && y >= w1[1] && y <= w4[1])
+    if (x > w1[0] && x < w4[0] && y > w1[1] && y < w4[1])
     {
         return COLLISION_TANK;
     }
 
-    if (((x + r) >= w1[0] && (x - r) < w1[0] && (y + r) <= w4[1] && (y - r) >= w1[1]) ||
-        ((y + r) >= w1[1] && (y - r) < w1[1] && (x + r) <= w4[0] && (x - r) >= w1[0]) ||
-        ((x - r) <= w4[0] && (x + r) > w4[0] && (y + r) <= w4[1] && (y - r) >= w1[1]) ||
-        ((y - r) <= w4[1] && (y + r) > w4[1] && (x + r) <= w4[0] && (x - r) >= w1[0]))
+    if (((x + r) > w1[0] && (x - r) < w1[0] && (y + r) < w4[1] && (y - r) > w1[1]) ||
+        ((y + r) > w1[1] && (y - r) < w1[1] && (x + r) < w4[0] && (x - r) > w1[0]) ||
+        ((x - r) < w4[0] && (x + r) > w4[0] && (y + r) < w4[1] && (y - r) > w1[1]) ||
+        ((y - r) < w4[1] && (y + r) > w4[1] && (x + r) < w4[0] && (x - r) > w1[0]))
     {
         return COLLISION_TANK;
     }
@@ -654,6 +744,12 @@ static void swap_player(void)
     {
         curr_player = player1;
         other_player = player2;
+    }
+
+    if (curr_player->is_bot)
+    {
+        curr_player->curr_weapon = curr_player->weapons[rand() % 3];
+        curr_player->power = (rand() % 60 + 20);
     }
 }
 
