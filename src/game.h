@@ -10,7 +10,7 @@
 #define BULLET_H 10
 #define POWER 60
 #define DELAY_POINTS 1000
-#define DELAY_RADIUS 50
+#define DELAY_RADIUS 25
 #define DELAY_INPUT 15
 #define DELAY_BETWEEN_BULLET 100
 
