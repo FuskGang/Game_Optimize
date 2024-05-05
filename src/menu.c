@@ -13,7 +13,7 @@ void init_menu(void)
 {
 	clear_widgets();
 
-    Widget *w;
+	Widget *w;
 	int x;
 	int y;
 
@@ -53,25 +53,24 @@ void init_menu(void)
 	app.delegate.update = &update;
 	app.delegate.draw = &draw;
 
-
-    cursorTexture = load_texture("assets/alien.png");
+	cursorTexture = load_texture("assets/cursor.png");
 	SDL_QueryTexture(cursorTexture, NULL, NULL, &app.mouse.w, &app.mouse.h);
 }
 
 static void update(void)
 {
-    do_widgets();
+	do_widgets();
 }
 
 static void draw(void)
 {
-    draw_widgets();
+	draw_widgets();
 	draw_cursor();
 }
 
 void draw_cursor(void)
 {
-    blit(cursorTexture, &app.mouse, 1);
+	blit(cursorTexture, &app.mouse, 1);
 }
 
 static void start(void)
