@@ -62,6 +62,7 @@ typedef struct
 	SDL_Point second_base_pixel;
 	int degrees;
 	char is_shoot;
+	SDL_bool is_bot;
 } Tank;
 
 typedef struct Widget

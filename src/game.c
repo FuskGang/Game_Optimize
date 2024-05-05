@@ -11,7 +11,6 @@ static void get_player(Tank *player, char *name,
 static void get_weapon(Weapon *weapon, char *name, int damage, int max_radius, int max_bullet_count);
 static void drop_player(Tank *);
 static void draw_player(Tank *);
-static float calculate_delta_time(void);
 static void draw_stats(Tank *);
 static void do_input(Tank *);
 static void update_bullet(Tank *, int);
@@ -20,9 +19,11 @@ static void update_hit(Tank *, int);
 static void draw_hit(Tank *, int);
 static void draw_bullet(Tank *, int);
 static void drop_earth(int, int, int);
+static SDL_bool test_shoot(void);
 static collision check_earth_collision(Bullet);
 static collision check_tank_collision(Tank *, int, int, int);
 static void swap_player(void);
+static float calculate_delta_time(void);
 
 static Tank *player1;
 static Tank *player2;
@@ -57,6 +58,9 @@ static void init_player(void)
                SCREEN_WIDTH - 800, 0,
                "assets/Bullet2.png", 255, 0, 0,
                "assets/Tank.png");
+
+    player1->is_bot = SDL_FALSE;
+    player2->is_bot = SDL_TRUE;
 
     drop_player(player1);
     drop_player(player2);
@@ -247,6 +251,19 @@ static void do_input(Tank *player)
             player->power -= 1;
         }
     }
+
+    if (app.keyboard[SDL_SCANCODE_B])
+    {
+        if (test_shoot() == SDL_FALSE)
+        {
+            player->muzzle.degrees += 1;
+
+            if (player->muzzle.degrees < 0)
+            {
+                player->muzzle.degrees += 360;
+            }
+        }
+    }
 }
 
 static void update(void)
@@ -322,82 +339,10 @@ static void update_tank(Tank *player)
     player->muzzle.end_y = player->muzzle.start_y + player->muzzle.length * sin(player->muzzle.angle);
 }
 
-static void draw(void)
-{
-    draw_pixel_map();
-    draw_player(other_player);
-    draw_player(curr_player);
-    draw_stats(curr_player);
-}
-
-static void draw_player(Tank *player)
-{
-    if (player->size.y + player->size.h > SCREEN_HEIGHT)
-    {
-        player->size.y = SCREEN_HEIGHT - player->size.h;
-    }
-
-    blit_rotated(player->texture, player->size, FALSE, player->degrees);
-    thickLineRGBA(app.renderer,
-                  player->muzzle.start_x,
-                  player->muzzle.start_y,
-                  player->muzzle.end_x,
-                  player->muzzle.end_y,
-                  player->muzzle.thickness,
-                  150, 150, 150, 255);
-
-    for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
-    {
-        if (player->bullet[curr_bull_ind].is_shoot)
-        {
-            draw_bullet(player, curr_bull_ind);
-        }
-
-        if (player->bullet[curr_bull_ind].is_hit)
-        {
-            draw_hit(player, curr_bull_ind);
-        }
-    }
-}
-
-static float calculate_delta_time(void)
-{
-    static unsigned int last_frame = 0;
-    unsigned int current_frame = SDL_GetTicks();
-    delta_time = (float)(current_frame - last_frame) / 1000.0f;
-    last_frame = current_frame;
-    return delta_time;
-}
-
-static void draw_stats(Tank *player)
-{
-    char angle[100], power[100], points[100], damage[100], weapon[255];
-
-    sprintf(angle, "Current angle: %d", player->muzzle.degrees % 360);
-    sprintf(power, "Current power: %d", player->power);
-    sprintf(points, "Current points: %d", player->points);
-    sprintf(weapon, "Current weapon: %s", player->curr_weapon.weapon_name);
-    sprintf(damage, "+%d", player->curr_weapon.damage);
-
-    draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
-    draw_text(angle, 50, 50, player->color.r, player->color.g, player->color.b);
-    draw_text(power, 50, 80, player->color.r, player->color.g, player->color.b);
-    draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
-
-    if (player->damage_target == DAMAGE_TARGET_OTHER || player->damage_target == DAMAGE_TARGET_BOTH)
-    {
-        draw_text(damage, player->size.x + 20, player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, player->color.r, player->color.g, player->color.b);
-    }
-
-    if (player->damage_target == DAMAGE_TARGET_CURRENT || player->damage_target == DAMAGE_TARGET_BOTH)
-    {
-        draw_text(damage, other_player->size.x + 20, other_player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, other_player->color.r, other_player->color.g, other_player->color.b);
-    }
-}
-
 static void update_bullet(Tank *player, int bullet_ind)
 {
     collision col = check_earth_collision(player->bullet[bullet_ind]);
+
     if (col == COLLISION_EARTH || col == COLLISION_TANK)
     {
         player->bullet[bullet_ind].is_shoot = 0;
@@ -406,10 +351,9 @@ static void update_bullet(Tank *player, int bullet_ind)
         return;
     }
 
-    double speed_up = 3;
-    double t = speed_up * (SDL_GetTicks() - player->bullet[bullet_ind].shoot_time) / 1000.0;
-    double x = speed_up * player->power * t * cos(player->muzzle.angle + bullet_ind * 0.01);
-    double y = speed_up * player->power * t * sin(player->muzzle.angle + bullet_ind * 0.01) + speed_up * 0.5 * G * t * t;
+    double t = SPEED_UP * (SDL_GetTicks() - player->bullet[bullet_ind].shoot_time) / 1000.0;
+    double x = SPEED_UP * player->power * t * cos(player->muzzle.angle + bullet_ind * 0.01);
+    double y = SPEED_UP * player->power * t * sin(player->muzzle.angle + bullet_ind * 0.01) + SPEED_UP * 0.5 * G * t * t;
 
     player->bullet[bullet_ind].position.x = player->muzzle.end_x + x;
     player->bullet[bullet_ind].position.y = player->muzzle.end_y + y;
@@ -484,6 +428,70 @@ static void update_hit(Tank *player, int bullet_ind)
     }
 }
 
+static void draw(void)
+{
+    draw_pixel_map();
+    draw_player(other_player);
+    draw_player(curr_player);
+    draw_stats(curr_player);
+}
+
+static void draw_player(Tank *player)
+{
+    if (player->size.y + player->size.h > SCREEN_HEIGHT)
+    {
+        player->size.y = SCREEN_HEIGHT - player->size.h;
+    }
+
+    blit_rotated(player->texture, player->size, FALSE, player->degrees);
+    thickLineRGBA(app.renderer,
+                  player->muzzle.start_x,
+                  player->muzzle.start_y,
+                  player->muzzle.end_x,
+                  player->muzzle.end_y,
+                  player->muzzle.thickness,
+                  150, 150, 150, 255);
+
+    for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
+    {
+        if (player->bullet[curr_bull_ind].is_shoot)
+        {
+            draw_bullet(player, curr_bull_ind);
+        }
+
+        if (player->bullet[curr_bull_ind].is_hit)
+        {
+            draw_hit(player, curr_bull_ind);
+        }
+    }
+}
+
+static void draw_stats(Tank *player)
+{
+    char angle[100], power[100], points[100], damage[100], weapon[255];
+
+    sprintf(angle, "Current angle: %d", player->muzzle.degrees % 360);
+    sprintf(power, "Current power: %d", player->power);
+    sprintf(points, "Current points: %d", player->points);
+    sprintf(weapon, "Current weapon: %s", player->curr_weapon.weapon_name);
+    sprintf(damage, "+%d", player->curr_weapon.damage);
+
+    draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
+    draw_text(angle, 50, 50, player->color.r, player->color.g, player->color.b);
+    draw_text(power, 50, 80, player->color.r, player->color.g, player->color.b);
+    draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
+
+    if (player->damage_target == DAMAGE_TARGET_OTHER || player->damage_target == DAMAGE_TARGET_BOTH)
+    {
+        draw_text(damage, player->size.x + 20, player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, player->color.r, player->color.g, player->color.b);
+    }
+
+    if (player->damage_target == DAMAGE_TARGET_CURRENT || player->damage_target == DAMAGE_TARGET_BOTH)
+    {
+        draw_text(damage, other_player->size.x + 20, other_player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, other_player->color.r, other_player->color.g, other_player->color.b);
+    }
+}
+
 static void draw_hit(Tank *player, int bullet_ind)
 {
     filledCircleRGBA(app.renderer,
@@ -533,6 +541,43 @@ static void drop_earth(int x, int y, int r)
     }
 
     set_map();
+}
+
+static SDL_bool test_shoot(void)
+{
+    double x_offset, y_offset;
+    int bullet_poz_x, bullet_poz_y;
+    Bullet test_bullet;
+    test_bullet.position.x = 0;
+    test_bullet.position.y = 0;
+    test_bullet.position.h = 10;
+    test_bullet.position.w = 10;
+
+
+    for (double t = 0.0f; t < 30.0f; t = t + 0.09)
+    {
+        if (check_earth_collision(test_bullet) == COLLISION_EARTH || check_earth_collision(test_bullet) == COLLISION_TANK)
+        {
+
+            if (check_tank_collision(other_player, bullet_poz_x + BULLET_W / 2, bullet_poz_y + BULLET_H / 2, curr_player->curr_weapon.max_radius) == COLLISION_TANK)
+            {
+                return SDL_TRUE;
+            }
+
+            return SDL_FALSE;
+        }
+
+        x_offset = SPEED_UP * curr_player->power * t * cos(curr_player->muzzle.angle);
+        y_offset = SPEED_UP * curr_player->power * t * sin(curr_player->muzzle.angle) + SPEED_UP * 0.5 * G * t * t;
+
+        bullet_poz_x = curr_player->muzzle.end_x + x_offset;
+        bullet_poz_y = curr_player->muzzle.end_y + y_offset;
+
+        test_bullet.position.x = bullet_poz_x;
+        test_bullet.position.y = bullet_poz_y;
+    }
+
+    return SDL_FALSE;
 }
 
 static collision check_tank_collision(Tank *player, int x, int y, int r)
@@ -610,4 +655,13 @@ static void swap_player(void)
         curr_player = player1;
         other_player = player2;
     }
+}
+
+static float calculate_delta_time(void)
+{
+    static unsigned int last_frame = 0;
+    unsigned int current_frame = SDL_GetTicks();
+    delta_time = (float)(current_frame - last_frame) / 1000.0f;
+    last_frame = current_frame;
+    return delta_time;
 }
