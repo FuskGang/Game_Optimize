@@ -19,6 +19,7 @@ static void update_tank(Tank *);
 static void update_hit(Tank *, int);
 static void draw_hit(Tank *, int);
 static void draw_bullet(Tank *, int);
+static void draw_final_screen(void);
 static void drop_earth(int, int, int);
 static SDL_bool test_shoot(void);
 static collision check_earth_collision(Bullet);
@@ -26,6 +27,8 @@ static collision check_tank_collision(Tank *, int, int, int);
 static void swap_player(void);
 static float calculate_delta_time(void);
 
+static int curr_move;
+static Uint32 start_game_over_time;
 static Tank *player1;
 static Tank *player2;
 static Tank *curr_player;
@@ -60,8 +63,9 @@ static void init_player(void)
                "assets/Bullet2.png", 255, 0, 0,
                "assets/Tank.png");
 
-    player1->is_bot = SDL_TRUE;
+    player1->is_bot = SDL_FALSE;
     player2->is_bot = SDL_TRUE;
+    curr_move = 0;
 
     drop_player(player1);
     drop_player(player2);
@@ -353,6 +357,11 @@ static void update(void)
 {
     delta_time = calculate_delta_time();
 
+    if (curr_move == MAX_MOVE * 2)
+    {
+        return;
+    }
+
     if (curr_player->is_bot)
     {
         do_bot_input(curr_player);
@@ -521,9 +530,17 @@ static void update_hit(Tank *player, int bullet_ind)
 
 static void draw(void)
 {
+
     draw_pixel_map();
     draw_player(other_player);
     draw_player(curr_player);
+
+    if (curr_move == MAX_MOVE * 2)
+    {
+        draw_final_screen();
+        return;
+    }
+
     draw_stats(curr_player);
 }
 
@@ -599,6 +616,39 @@ static void draw_bullet(Tank *player, int bullet_ind)
     blit(player->bullet[bullet_ind].texture, &player->bullet[bullet_ind].position, 1);
 }
 
+static void draw_final_screen(void)
+{
+    if (SDL_GetTicks() - start_game_over_time > DELAY_FINAL_SCREEN)
+    {
+        init_menu();
+    }
+
+    char game_over[355], winner_text[355], loser_text[355] = "";
+
+    sprintf(game_over, "Game over!");
+
+    if (curr_player->points > other_player->points)
+    {
+        sprintf(winner_text, "Winner - %s with %d points", curr_player->player_name, curr_player->points);
+        sprintf(loser_text, "Loser - %s with %d points", other_player->player_name, other_player->points);
+    }
+
+    else if (curr_player->points < other_player->points)
+    {
+        sprintf(winner_text, "Winner - %s with %d points", other_player->player_name, other_player->points);
+        sprintf(loser_text, "Loser - %s with %d points", curr_player->player_name, curr_player->points);
+    }
+
+    else
+    {
+        sprintf(winner_text, "Draw with %d", curr_player->points);
+    }
+
+    draw_text(game_over, SCREEN_WIDTH / 2 - 50, 100, 255, 255, 255);
+    draw_text(winner_text, SCREEN_WIDTH / 2 - 50, 150, 255, 255, 255);
+    draw_text(loser_text, SCREEN_WIDTH / 2 - 50, 200, 255, 255, 255);
+}
+
 static void drop_earth(int x, int y, int r)
 {
     double d;
@@ -649,7 +699,7 @@ static SDL_bool test_shoot(void)
         if (check_earth_collision(test_bullet) == COLLISION_EARTH || check_earth_collision(test_bullet) == COLLISION_TANK)
         {
 
-            if (check_tank_collision(other_player, bullet_poz_x + BULLET_W / 2, bullet_poz_y + BULLET_H / 2, curr_player->curr_weapon.max_radius) == COLLISION_TANK)
+            if (check_tank_collision(other_player, bullet_poz_x + BULLET_W / 2, bullet_poz_y + BULLET_H / 2, curr_player->curr_weapon.max_radius - 10) == COLLISION_TANK)
             {
                 return SDL_TRUE;
             }
@@ -751,6 +801,14 @@ static void swap_player(void)
         curr_player->curr_weapon = curr_player->weapons[rand() % 3];
         curr_player->power = (rand() % 60 + 20);
     }
+
+    curr_move++;
+
+    if (curr_move == MAX_MOVE * 2)
+    {
+        start_game_over_time = SDL_GetTicks();
+    }
+
 }
 
 static float calculate_delta_time(void)

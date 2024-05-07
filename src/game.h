@@ -12,9 +12,11 @@
 #define DELAY_POINTS 1000
 #define DELAY_RADIUS 5
 #define DELAY_HUMAN_INPUT 15
-#define DELAY_BOT_INPUT 30
+#define DELAY_BOT_INPUT 15
 #define DELAY_BETWEEN_BULLET 100
+#define DELAY_FINAL_SCREEN 3000
 #define SPEED_UP 3
+#define MAX_MOVE 3
 
 #include "common.h"
 #include "menu.h"
