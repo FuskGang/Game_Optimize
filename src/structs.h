@@ -49,8 +49,9 @@ typedef struct
 	SDL_Texture *texture;
 	SDL_Color color;
 	SDL_Rect size;
+	SDL_Point bounding_box[4];
 	Muzzle muzzle;
-	Bullet bullet[MAX_BULLET];
+	Bullet bullets[MAX_BULLET];
 	Weapon curr_weapon;
 	Weapon weapons[3];
 	int power;
