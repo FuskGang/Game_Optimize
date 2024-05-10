@@ -21,7 +21,7 @@ static void draw_hit(Tank *, int);
 static void draw_bullet(Tank *, int);
 static void draw_final_screen(void);
 static void drop_earth(int, int, int);
-static SDL_bool test_shoot(void);
+static SDL_bool do_test_shoot(void);
 static collision check_earth_collision(Bullet);
 static collision check_tank_collision(Tank *, int, int, int);
 static void swap_player(void);
@@ -259,7 +259,7 @@ static void do_human_input(Tank *player)
 
     // if (app.keyboard[SDL_SCANCODE_B])
     // {
-    //     if (test_shoot() == SDL_FALSE)
+    //     if (do_test_shoot() == SDL_FALSE)
     //     {
     //         player->muzzle.degrees += 1;
 
@@ -271,7 +271,7 @@ static void do_human_input(Tank *player)
     // }
 }
 
-static void do_bot_input(Tank *player)
+static void do_bot_input(Tank *bot)
 {
     SDL_bool is_success_shoot;
 
@@ -281,37 +281,37 @@ static void do_bot_input(Tank *player)
         init_menu();
     }
 
-    if (player->is_shoot)
+    if (bot->is_shoot)
     {
         return;
     }
 
-    if ((SDL_GetTicks() - player->input_time < DELAY_BOT_INPUT))
+    if ((SDL_GetTicks() - bot->input_time < DELAY_BOT_INPUT))
     {
         return;
     }
 
-    is_success_shoot = test_shoot();
+    is_success_shoot = do_test_shoot();
 
-    if (player->power < 50)
+    if (bot->power < 50)
     {
-        player->input_time = SDL_GetTicks();
+        bot->input_time = SDL_GetTicks();
 
-        if (player->power < 100)
+        if (bot->power < 100)
         {
-            player->power += 1;
+            bot->power += 1;
         }
 
         return;
     }
 
-    if (player->power > 80)
+    if (bot->power > 80)
     {
-        player->input_time = SDL_GetTicks();
+        bot->input_time = SDL_GetTicks();
 
-        if (player->power > 1)
+        if (bot->power > 1)
         {
-            player->power -= 1;
+            bot->power -= 1;
         }
 
         return;
@@ -321,25 +321,25 @@ static void do_bot_input(Tank *player)
     {
         if (other_player->size.x > curr_player->size.x)
         {
-            player->input_time = SDL_GetTicks();
+            bot->input_time = SDL_GetTicks();
 
-            player->muzzle.degrees += 1;
+            bot->muzzle.degrees += 1;
 
-            if (player->muzzle.degrees > 359)
+            if (bot->muzzle.degrees > 359)
             {
-                player->muzzle.degrees -= 360;
+                bot->muzzle.degrees -= 360;
             }
         }
 
         else
         {
-            player->input_time = SDL_GetTicks();
+            bot->input_time = SDL_GetTicks();
 
-            player->muzzle.degrees -= 1;
+            bot->muzzle.degrees -= 1;
 
-            if (player->muzzle.degrees < 0)
+            if (bot->muzzle.degrees < 0)
             {
-                player->muzzle.degrees += 360;
+                bot->muzzle.degrees += 360;
             }
         }
 
@@ -348,7 +348,7 @@ static void do_bot_input(Tank *player)
 
     if (is_success_shoot)
     {
-        player->is_shoot = 1;
+        bot->is_shoot = 1;
         return;
     }
 }   
@@ -357,7 +357,7 @@ static void update(void)
 {
     delta_time = calculate_delta_time();
 
-    if (curr_move == MAX_MOVE * 2)
+    if (curr_move == TOTAL_MOVE * 2)
     {
         return;
     }
@@ -535,7 +535,7 @@ static void draw(void)
     draw_player(other_player);
     draw_player(curr_player);
 
-    if (curr_move == MAX_MOVE * 2)
+    if (curr_move == TOTAL_MOVE * 2)
     {
         draw_final_screen();
         return;
@@ -623,7 +623,7 @@ static void draw_final_screen(void)
         init_menu();
     }
 
-    char game_over[355], winner_text[355], loser_text[355] = "";
+    char game_over[355] = "", winner_text[355] = "", loser_text[355] = "";
 
     sprintf(game_over, "Game over!");
 
@@ -684,7 +684,7 @@ static void drop_earth(int x, int y, int r)
     set_map();
 }
 
-static SDL_bool test_shoot(void)
+static SDL_bool do_test_shoot(void)
 {
     double x_offset, y_offset;
     int bullet_poz_x, bullet_poz_y;
@@ -804,7 +804,7 @@ static void swap_player(void)
 
     curr_move++;
 
-    if (curr_move == MAX_MOVE * 2)
+    if (curr_move == TOTAL_MOVE * 2)
     {
         start_game_over_time = SDL_GetTicks();
     }
