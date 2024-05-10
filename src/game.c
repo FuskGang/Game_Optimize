@@ -588,6 +588,19 @@ static collision check_tank_collision(Tank *player, int x, int y, int r)
         return COLLISION_TANK;
     }
 
+    if (x >= w1[0] && x <= w4[0] && y >= w1[1] && y <= w4[1])
+    {
+        return COLLISION_TANK;
+    }
+
+    if (((x + r) >= w1[0] && (x - r) < w1[0] && (y + r) <= w4[1] && (y - r) >= w1[1]) ||
+        ((y + r) >= w1[1] && (y - r) < w1[1] && (x + r) <= w4[0] && (x - r) >= w1[0]) ||
+        ((x - r) <= w4[0] && (x + r) > w4[0] && (y + r) <= w4[1] && (y - r) >= w1[1]) ||
+        ((y - r) <= w4[1] && (y + r) > w4[1] && (x + r) <= w4[0] && (x - r) >= w1[0]))
+    {
+        return COLLISION_TANK;
+    }
+
     return COLLISION_NONE;
 }
 
