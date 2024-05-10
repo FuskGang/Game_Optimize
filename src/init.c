@@ -42,6 +42,8 @@ void init_SDL(void)
         printf("Failed to create renderer: %s\n", SDL_GetError());
         exit(1);
     }
+
+    SDL_ShowCursor(SDL_DISABLE);
 }
 
 void cleanup(void)
