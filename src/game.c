@@ -28,7 +28,6 @@ static void swap_player(void);
 static float calculate_delta_time(void);
 
 static int curr_move;
-static Uint32 start_game_over_time;
 static Tank *player1;
 static Tank *player2;
 static Tank *curr_player;
@@ -64,7 +63,7 @@ static void init_player(void)
                "assets/Tank.png");
 
     player1->is_bot = SDL_FALSE;
-    player2->is_bot = SDL_TRUE;
+    player2->is_bot = SDL_FALSE;
     curr_move = 0;
 
     drop_player(player1);
@@ -357,7 +356,7 @@ static void update(void)
 {
     delta_time = calculate_delta_time();
 
-    if (curr_move == TOTAL_MOVE * 2)
+    if (curr_move == TOTAL_MOVE)
     {
         return;
     }
@@ -535,7 +534,7 @@ static void draw(void)
     draw_player(other_player);
     draw_player(curr_player);
 
-    if (curr_move == TOTAL_MOVE * 2)
+    if (curr_move == TOTAL_MOVE)
     {
         draw_final_screen();
         return;
@@ -618,12 +617,7 @@ static void draw_bullet(Tank *player, int bullet_ind)
 
 static void draw_final_screen(void)
 {
-    if (SDL_GetTicks() - start_game_over_time > DELAY_FINAL_SCREEN)
-    {
-        init_menu();
-    }
-
-    char game_over[355] = "", winner_text[355] = "", loser_text[355] = "";
+    char game_over[355] = "", winner_text[355] = "", loser_text[355] = "", press_key[] = "Press esc to exit game";
 
     sprintf(game_over, "Game over!");
 
@@ -645,8 +639,15 @@ static void draw_final_screen(void)
     }
 
     draw_text(game_over, SCREEN_WIDTH / 2 - 50, 100, 255, 255, 255);
-    draw_text(winner_text, SCREEN_WIDTH / 2 - 50, 150, 255, 255, 255);
-    draw_text(loser_text, SCREEN_WIDTH / 2 - 50, 200, 255, 255, 255);
+    draw_text(winner_text, SCREEN_WIDTH / 2 - 50, 120, 255, 255, 255);
+    draw_text(loser_text, SCREEN_WIDTH / 2 - 50, 140, 255, 255, 255);
+    draw_text(press_key, SCREEN_WIDTH / 2 - 50, 160, 255, 255, 255);
+
+    if (app.keyboard[SDL_SCANCODE_ESCAPE])
+    {
+        init_menu();
+    }
+
 }
 
 static void drop_earth(int x, int y, int r)
@@ -803,11 +804,6 @@ static void swap_player(void)
     }
 
     curr_move++;
-
-    if (curr_move == TOTAL_MOVE * 2)
-    {
-        start_game_over_time = SDL_GetTicks();
-    }
 
 }
 
