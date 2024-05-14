@@ -15,7 +15,7 @@
 #define DELAY_BOT_INPUT 15
 #define DELAY_BETWEEN_BULLET 100
 #define SPEED_UP 3
-#define TOTAL_MOVE 3
+#define TOTAL_MOVES 3
 
 #include "common.h"
 #include "menu.h"

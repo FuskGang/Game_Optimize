@@ -345,7 +345,7 @@ static void do_bot_input(Tank *bot)
         return;
     }
 
-    if (is_success_shoot)
+    else
     {
         bot->is_shoot = 1;
         return;
@@ -356,7 +356,7 @@ static void update(void)
 {
     delta_time = calculate_delta_time();
 
-    if (curr_move == TOTAL_MOVE)
+    if (curr_move == TOTAL_MOVES)
     {
         return;
     }
@@ -534,7 +534,7 @@ static void draw(void)
     draw_player(other_player);
     draw_player(curr_player);
 
-    if (curr_move == TOTAL_MOVE)
+    if (curr_move == TOTAL_MOVES)
     {
         draw_final_screen();
         return;
@@ -687,9 +687,11 @@ static void drop_earth(int x, int y, int r)
 
 static SDL_bool do_test_shoot(void)
 {
-    double x_offset, y_offset;
-    int bullet_poz_x, bullet_poz_y;
+    int bullet_poz_x = 0, bullet_poz_y = 0;
     Bullet test_bullet;
+
+    memset(&test_bullet, 0, sizeof(test_bullet));
+
     test_bullet.position.x = 0;
     test_bullet.position.y = 0;
     test_bullet.position.h = 10;
@@ -700,7 +702,7 @@ static SDL_bool do_test_shoot(void)
         if (check_earth_collision(test_bullet) == COLLISION_EARTH || check_earth_collision(test_bullet) == COLLISION_TANK)
         {
 
-            if (check_tank_collision(other_player, bullet_poz_x + BULLET_W / 2, bullet_poz_y + BULLET_H / 2, curr_player->curr_weapon.max_radius - 10) == COLLISION_TANK)
+            if (check_tank_collision(other_player, bullet_poz_x + BULLET_W / 2, bullet_poz_y + BULLET_H / 2, curr_player->curr_weapon.max_radius) == COLLISION_TANK)
             {
                 return SDL_TRUE;
             }
@@ -708,8 +710,8 @@ static SDL_bool do_test_shoot(void)
             return SDL_FALSE;
         }
 
-        x_offset = SPEED_UP * curr_player->power * t * cos(curr_player->muzzle.angle);
-        y_offset = SPEED_UP * curr_player->power * t * sin(curr_player->muzzle.angle) + SPEED_UP * 0.5 * G * t * t;
+        double x_offset = SPEED_UP * curr_player->power * t * cos(curr_player->muzzle.angle);
+        double y_offset = SPEED_UP * curr_player->power * t * sin(curr_player->muzzle.angle) + SPEED_UP * 0.5 * G * t * t;
 
         bullet_poz_x = curr_player->muzzle.end_x + x_offset;
         bullet_poz_y = curr_player->muzzle.end_y + y_offset;
