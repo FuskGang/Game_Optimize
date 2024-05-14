@@ -101,13 +101,13 @@ static void get_player(Tank *player, char *name,
 
     for (int i = 0; i < MAX_BULLET; i++)
     {
-        player->bullet[i].texture = bullet_texture;
-        player->bullet[i].position.w = BULLET_W;
-        player->bullet[i].position.h = BULLET_H;
-        player->bullet[i].is_radius_up = 0;
-        player->bullet[i].curr_radius = 0;
-        player->bullet[i].is_hit = 0;
-        player->bullet[i].is_shoot = 0;
+        player->bullets[i].texture = bullet_texture;
+        player->bullets[i].position.w = BULLET_W;
+        player->bullets[i].position.h = BULLET_H;
+        player->bullets[i].is_radius_up = 0;
+        player->bullets[i].curr_radius = 0;
+        player->bullets[i].is_hit = 0;
+        player->bullets[i].is_shoot = 0;
     }
 
     player->power = POWER;
@@ -183,7 +183,7 @@ static void do_human_input(Tank *player)
     if ((SDL_GetTicks() - player->input_time < DELAY_HUMAN_INPUT))
     {
         return;
-    } 
+    }
 
     if (app.keyboard[SDL_SCANCODE_SPACE])
     {
@@ -253,6 +253,26 @@ static void do_human_input(Tank *player)
         if (player->power > 1)
         {
             player->power -= 1;
+        }
+    }
+
+    if (app.keyboard[SDL_SCANCODE_Z])
+    {
+        player->input_time = SDL_GetTicks();
+
+        if (player->size.x > 1)
+        {
+            player->size.x -= 1;
+        }
+    }
+
+    if (app.keyboard[SDL_SCANCODE_X])
+    {
+        player->input_time = SDL_GetTicks();
+
+        if (player->size.x + player->size.w < SCREEN_WIDTH)
+        {
+            player->size.x += 1;
         }
     }
 
@@ -350,7 +370,7 @@ static void do_bot_input(Tank *bot)
         bot->is_shoot = 1;
         return;
     }
-}   
+}
 
 static void update(void)
 {
@@ -382,7 +402,7 @@ static void update_tank(Tank *player)
     for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
     {
         if (player->is_shoot && (player->curr_weapon.current_bullet_count != player->curr_weapon.max_bullet_count) &&
-            !player->bullet[curr_bull_ind].is_shoot && !player->bullet[curr_bull_ind].is_hit)
+            !player->bullets[curr_bull_ind].is_shoot && !player->bullets[curr_bull_ind].is_hit)
         {
             if ((SDL_GetTicks() - player->last_shoot_time) < DELAY_BETWEEN_BULLET && player->last_shoot_time != 0)
             {
@@ -390,19 +410,19 @@ static void update_tank(Tank *player)
             }
 
             player->curr_weapon.current_bullet_count++;
-            player->bullet[curr_bull_ind].is_shoot = 1;
-            player->bullet[curr_bull_ind].angle = player->muzzle.angle;
-            player->bullet[curr_bull_ind].shoot_time = SDL_GetTicks();
+            player->bullets[curr_bull_ind].is_shoot = 1;
+            player->bullets[curr_bull_ind].angle = player->muzzle.angle;
+            player->bullets[curr_bull_ind].shoot_time = SDL_GetTicks();
             player->last_shoot_time = SDL_GetTicks();
         }
 
-        if (player->bullet[curr_bull_ind].is_shoot)
+        if (player->bullets[curr_bull_ind].is_shoot)
         {
             is_tank_shoot = 1;
             update_bullet(player, curr_bull_ind);
         }
 
-        else if (player->bullet[curr_bull_ind].is_hit)
+        else if (player->bullets[curr_bull_ind].is_hit)
         {
             is_tank_shoot = 1;
             update_hit(player, curr_bull_ind);
@@ -410,8 +430,8 @@ static void update_tank(Tank *player)
 
         else
         {
-            player->bullet[curr_bull_ind].position.x = player->muzzle.end_x;
-            player->bullet[curr_bull_ind].position.y = player->muzzle.end_y;
+            player->bullets[curr_bull_ind].position.x = player->muzzle.end_x;
+            player->bullets[curr_bull_ind].position.y = player->muzzle.end_y;
         }
     }
 
@@ -430,101 +450,11 @@ static void update_tank(Tank *player)
         }
     }
 
-
     player->muzzle.start_x = player->size.x + player->size.w / 2;
     player->muzzle.start_y = player->size.y + player->size.h / 4;
     player->muzzle.angle = (player->muzzle.degrees - 90) * M_PI / 180;
     player->muzzle.end_x = player->muzzle.start_x + player->muzzle.length * cos(player->muzzle.angle);
     player->muzzle.end_y = player->muzzle.start_y + player->muzzle.length * sin(player->muzzle.angle);
-}
-
-static void update_bullet(Tank *player, int bullet_ind)
-{
-    collision col = check_earth_collision(player->bullet[bullet_ind]);
-
-    if (col == COLLISION_EARTH || col == COLLISION_TANK)
-    {
-        player->bullet[bullet_ind].is_shoot = 0;
-        player->bullet[bullet_ind].is_hit = 1;
-        player->bullet[bullet_ind].radius_time = SDL_GetTicks();
-        return;
-    }
-
-    double t = SPEED_UP * (SDL_GetTicks() - player->bullet[bullet_ind].shoot_time) / 1000.0;
-    double x = SPEED_UP * player->power * t * cos(player->muzzle.angle + bullet_ind * 0.01);
-    double y = SPEED_UP * player->power * t * sin(player->muzzle.angle + bullet_ind * 0.01) + SPEED_UP * 0.5 * G * t * t;
-
-    player->bullet[bullet_ind].position.x = player->muzzle.end_x + x;
-    player->bullet[bullet_ind].position.y = player->muzzle.end_y + y;
-}
-
-static void update_hit(Tank *player, int bullet_ind)
-{
-    if (SDL_GetTicks() - player->bullet[bullet_ind].radius_time < DELAY_RADIUS)
-    {
-        return;
-    }
-
-    player->bullet[bullet_ind].radius_time = SDL_GetTicks();
-
-    if (player->bullet[bullet_ind].is_radius_up == 0)
-    {
-        player->bullet[bullet_ind].curr_radius++;
-    }
-
-    else
-    {
-        player->bullet[bullet_ind].curr_radius--;
-    }
-
-    if (player->bullet[bullet_ind].curr_radius == player->curr_weapon.max_radius)
-    {
-        if (check_tank_collision(other_player,
-                                 player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
-                                 player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
-                                 player->bullet[bullet_ind].curr_radius) == COLLISION_TANK)
-        {
-            player->points += player->curr_weapon.damage;
-            player->damage_target = DAMAGE_TARGET_OTHER;
-            player->touch_time = SDL_GetTicks();
-            drop_player(other_player);
-        }
-
-        if (check_tank_collision(curr_player,
-                                 player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
-                                 player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
-                                 player->bullet[bullet_ind].curr_radius) == COLLISION_TANK)
-        {
-            other_player->points += player->curr_weapon.damage;
-
-            if (player->damage_target == DAMAGE_TARGET_OTHER)
-            {
-                player->damage_target = DAMAGE_TARGET_BOTH;
-            }
-
-            else
-            {
-                player->damage_target = DAMAGE_TARGET_CURRENT;
-            }
-
-            player->touch_time = SDL_GetTicks();
-            drop_player(curr_player);
-        }
-
-        drop_earth(player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
-                   player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
-                   player->bullet[bullet_ind].curr_radius);
-
-        player->bullet[bullet_ind].is_radius_up = 1;
-    }
-
-    if (player->bullet[bullet_ind].curr_radius == -1)
-    {
-        player->curr_weapon.hit_bullet_count++;
-        player->bullet[bullet_ind].is_hit = 0;
-        player->bullet[bullet_ind].curr_radius = 0;
-        player->bullet[bullet_ind].is_radius_up = 0;
-    }
 }
 
 static void draw(void)
@@ -561,16 +491,25 @@ static void draw_player(Tank *player)
 
     for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
     {
-        if (player->bullet[curr_bull_ind].is_shoot)
+        if (player->bullets[curr_bull_ind].is_shoot)
         {
             draw_bullet(player, curr_bull_ind);
         }
 
-        if (player->bullet[curr_bull_ind].is_hit)
+        if (player->bullets[curr_bull_ind].is_hit)
         {
             draw_hit(player, curr_bull_ind);
         }
     }
+}
+
+static float calculate_delta_time(void)
+{
+    static unsigned int last_frame = 0;
+    unsigned int current_frame = SDL_GetTicks();
+    delta_time = (float)(current_frame - last_frame) / 1000.0f;
+    last_frame = current_frame;
+    return delta_time;
 }
 
 static void draw_stats(Tank *player)
@@ -599,20 +538,109 @@ static void draw_stats(Tank *player)
     }
 }
 
+static void update_bullet(Tank *player, int bullet_ind)
+{
+    collision col = check_earth_collision(player->bullets[bullet_ind]);
+
+    if (col == COLLISION_EARTH || col == COLLISION_TANK)
+    {
+        player->bullets[bullet_ind].is_shoot = 0;
+        player->bullets[bullet_ind].is_hit = 1;
+        player->bullets[bullet_ind].radius_time = SDL_GetTicks();
+        return;
+    }
+
+    double t = SPEED_UP * (SDL_GetTicks() - player->bullets[bullet_ind].shoot_time) / 1000.0;
+    double x = SPEED_UP * player->power * t * cos(player->muzzle.angle + bullet_ind * 0.01);
+    double y = SPEED_UP * player->power * t * sin(player->muzzle.angle + bullet_ind * 0.01) + SPEED_UP * 0.5 * G * t * t;
+
+    player->bullets[bullet_ind].position.x = player->muzzle.end_x + x;
+    player->bullets[bullet_ind].position.y = player->muzzle.end_y + y;
+}
+
 static void draw_hit(Tank *player, int bullet_ind)
 {
     filledCircleRGBA(app.renderer,
-                     player->bullet[bullet_ind].position.x + player->bullet[bullet_ind].position.w / 2,
-                     player->bullet[bullet_ind].position.y + player->bullet[bullet_ind].position.h / 2,
-                     player->bullet[bullet_ind].curr_radius,
+                     player->bullets[bullet_ind].position.x + player->bullets[bullet_ind].position.w / 2,
+                     player->bullets[bullet_ind].position.y + player->bullets[bullet_ind].position.h / 2,
+                     player->bullets[bullet_ind].curr_radius,
                      255,
-                     141 + player->bullet[bullet_ind].curr_radius,
+                     141 + player->bullets[bullet_ind].curr_radius,
                      27, 255);
+}
+
+static void update_hit(Tank *player, int bullet_ind)
+{
+    if (SDL_GetTicks() - player->bullets[bullet_ind].radius_time < DELAY_RADIUS)
+    {
+        return;
+    }
+
+    player->bullets[bullet_ind].radius_time = SDL_GetTicks();
+
+    if (player->bullets[bullet_ind].is_radius_up == 0)
+    {
+        player->bullets[bullet_ind].curr_radius++;
+    }
+
+    else
+    {
+        player->bullets[bullet_ind].curr_radius--;
+    }
+
+    if (player->bullets[bullet_ind].curr_radius == player->curr_weapon.max_radius)
+    {
+        if (check_tank_collision(other_player,
+                                 player->bullets[bullet_ind].position.x + player->bullets[bullet_ind].position.w / 2,
+                                 player->bullets[bullet_ind].position.y + player->bullets[bullet_ind].position.h / 2,
+                                 player->bullets[bullet_ind].curr_radius) == COLLISION_TANK)
+        {
+            player->points += player->curr_weapon.damage;
+            player->damage_target = DAMAGE_TARGET_OTHER;
+            player->touch_time = SDL_GetTicks();
+            drop_player(other_player);
+        }
+
+        if (check_tank_collision(curr_player,
+                                 player->bullets[bullet_ind].position.x + player->bullets[bullet_ind].position.w / 2,
+                                 player->bullets[bullet_ind].position.y + player->bullets[bullet_ind].position.h / 2,
+                                 player->bullets[bullet_ind].curr_radius) == COLLISION_TANK)
+        {
+            other_player->points += player->curr_weapon.damage;
+
+            if (player->damage_target == DAMAGE_TARGET_OTHER)
+            {
+                player->damage_target = DAMAGE_TARGET_BOTH;
+            }
+
+            else
+            {
+                player->damage_target = DAMAGE_TARGET_CURRENT;
+            }
+
+            player->touch_time = SDL_GetTicks();
+            drop_player(curr_player);
+        }
+
+        drop_earth(player->bullets[bullet_ind].position.x + player->bullets[bullet_ind].position.w / 2,
+                   player->bullets[bullet_ind].position.y + player->bullets[bullet_ind].position.h / 2,
+                   player->bullets[bullet_ind].curr_radius);
+
+        player->bullets[bullet_ind].is_radius_up = 1;
+    }
+
+    if (player->bullets[bullet_ind].curr_radius == -1)
+    {
+        player->curr_weapon.hit_bullet_count++;
+        player->bullets[bullet_ind].is_hit = 0;
+        player->bullets[bullet_ind].curr_radius = 0;
+        player->bullets[bullet_ind].is_radius_up = 0;
+    }
 }
 
 static void draw_bullet(Tank *player, int bullet_ind)
 {
-    blit(player->bullet[bullet_ind].texture, &player->bullet[bullet_ind].position, 1);
+    blit(player->bullets[bullet_ind].texture, &player->bullets[bullet_ind].position, 1);
 }
 
 static void draw_final_screen(void)
@@ -647,7 +675,6 @@ static void draw_final_screen(void)
     {
         init_menu();
     }
-
 }
 
 static void drop_earth(int x, int y, int r)
@@ -806,14 +833,4 @@ static void swap_player(void)
     }
 
     curr_move++;
-
-}
-
-static float calculate_delta_time(void)
-{
-    static unsigned int last_frame = 0;
-    unsigned int current_frame = SDL_GetTicks();
-    delta_time = (float)(current_frame - last_frame) / 1000.0f;
-    last_frame = current_frame;
-    return delta_time;
 }
