@@ -572,10 +572,10 @@ static void drop_earth(int x, int y, int r)
 
 static collision check_tank_collision(Tank *player, int x, int y, int r)
 {
-    const int w1[2] = {player->size.x, player->size.y};
-    const int w2[2] = {player->size.x + player->size.w, player->size.y};
-    const int w3[2] = {player->size.x, player->size.y + player->size.h};
-    const int w4[2] = {player->size.x + player->size.w, player->size.y + player->size.h};
+    const int w1[2] = {player->bounding_box[0].x, player->bounding_box[0].y};
+    const int w2[2] = {player->bounding_box[1].x, player->bounding_box[1].y};
+    const int w3[2] = {player->bounding_box[2].x, player->bounding_box[2].y};
+    const int w4[2] = {player->bounding_box[3].x, player->bounding_box[3].y};
 
     double d1 = SDL_sqrt((SDL_pow((double)(x - w1[0]), 2.0f) + SDL_pow((double)(y - w1[1]), 2.0f)));
     double d2 = SDL_sqrt((SDL_pow((double)(x - w2[0]), 2.0f) + SDL_pow((double)(y - w2[1]), 2.0f)));
