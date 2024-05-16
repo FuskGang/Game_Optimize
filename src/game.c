@@ -137,6 +137,7 @@ static void get_weapon(Weapon *weapon, char *weapon_name, int damage, int max_ra
 
 static void drop_player(Tank *player)
 {
+    player->size.y = 0;
     int is_ground = 0;
     while (!is_ground)
     {
@@ -165,6 +166,13 @@ static void drop_player(Tank *player)
     }
 
     player->degrees = get_angle(player->first_base_pixel.x, player->first_base_pixel.y, player->second_base_pixel.x, player->second_base_pixel.y) % 180 - 90;
+
+    SDL_Point center = {player->size.x + player->size.w / 2, player->size.y + player->size.h};
+
+    rotate_point(player->size.x, player->size.y, center.x, center.y, player->degrees, &player->bounding_box[0].x, &player->bounding_box[0].y);
+    rotate_point(player->size.x + player->size.w, player->size.y, center.x, center.y, player->degrees, &player->bounding_box[1].x, &player->bounding_box[1].y);
+    rotate_point(player->size.x + player->size.w, player->size.y + player->size.h, center.x, center.y, player->degrees, &player->bounding_box[2].x, &player->bounding_box[2].y);
+    rotate_point(player->size.x, player->size.y + player->size.h, center.x, center.y, player->degrees, &player->bounding_box[3].x, &player->bounding_box[3].y);
 }
 
 static void do_human_input(Tank *player)
@@ -397,11 +405,25 @@ static void update(void)
 
 static void update_tank(Tank *player)
 {
+    player->muzzle.start_x = player->size.x + player->size.w / 2;
+    player->muzzle.start_y = player->size.y + player->size.h / 4;
+    player->muzzle.angle = (player->muzzle.degrees - 90) * M_PI / 180;
+    player->muzzle.end_x = player->muzzle.start_x + player->muzzle.length * cos(player->muzzle.angle);
+    player->muzzle.end_y = player->muzzle.start_y + player->muzzle.length * sin(player->muzzle.angle);
+
+    if (player->bounding_box[0].x != player->size.x)
+    {
+        drop_player(player);
+    }
+
     char is_tank_shoot = 0;
+
+    if (!player->is_shoot)
+        return;
 
     for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
     {
-        if (player->is_shoot && (player->curr_weapon.current_bullet_count != player->curr_weapon.max_bullet_count) &&
+        if (player->curr_weapon.current_bullet_count != player->curr_weapon.max_bullet_count &&
             !player->bullets[curr_bull_ind].is_shoot && !player->bullets[curr_bull_ind].is_hit)
         {
             if ((SDL_GetTicks() - player->last_shoot_time) < DELAY_BETWEEN_BULLET && player->last_shoot_time != 0)
@@ -413,6 +435,8 @@ static void update_tank(Tank *player)
             player->bullets[curr_bull_ind].is_shoot = 1;
             player->bullets[curr_bull_ind].angle = player->muzzle.angle;
             player->bullets[curr_bull_ind].shoot_time = SDL_GetTicks();
+            player->bullets[curr_bull_ind].position.x = player->muzzle.end_x;
+            player->bullets[curr_bull_ind].position.y = player->muzzle.end_y;
             player->last_shoot_time = SDL_GetTicks();
         }
 
@@ -421,21 +445,14 @@ static void update_tank(Tank *player)
             is_tank_shoot = 1;
             update_bullet(player, curr_bull_ind);
         }
-
         else if (player->bullets[curr_bull_ind].is_hit)
         {
             is_tank_shoot = 1;
             update_hit(player, curr_bull_ind);
         }
-
-        else
-        {
-            player->bullets[curr_bull_ind].position.x = player->muzzle.end_x;
-            player->bullets[curr_bull_ind].position.y = player->muzzle.end_y;
-        }
     }
 
-    if (player->is_shoot && player->curr_weapon.hit_bullet_count == player->curr_weapon.max_bullet_count)
+    if (player->curr_weapon.hit_bullet_count == player->curr_weapon.max_bullet_count)
     {
         if (is_tank_shoot == 0)
         {
@@ -448,93 +465,6 @@ static void update_tank(Tank *player)
                 swap_player();
             }
         }
-    }
-
-    player->muzzle.start_x = player->size.x + player->size.w / 2;
-    player->muzzle.start_y = player->size.y + player->size.h / 4;
-    player->muzzle.angle = (player->muzzle.degrees - 90) * M_PI / 180;
-    player->muzzle.end_x = player->muzzle.start_x + player->muzzle.length * cos(player->muzzle.angle);
-    player->muzzle.end_y = player->muzzle.start_y + player->muzzle.length * sin(player->muzzle.angle);
-}
-
-static void draw(void)
-{
-
-    draw_pixel_map();
-    draw_player(other_player);
-    draw_player(curr_player);
-
-    if (curr_move == TOTAL_MOVES)
-    {
-        draw_final_screen();
-        return;
-    }
-
-    draw_stats(curr_player);
-}
-
-static void draw_player(Tank *player)
-{
-    if (player->size.y + player->size.h > SCREEN_HEIGHT)
-    {
-        player->size.y = SCREEN_HEIGHT - player->size.h;
-    }
-
-    blit_rotated(player->texture, player->size, FALSE, player->degrees);
-    thickLineRGBA(app.renderer,
-                  player->muzzle.start_x,
-                  player->muzzle.start_y,
-                  player->muzzle.end_x,
-                  player->muzzle.end_y,
-                  player->muzzle.thickness,
-                  150, 150, 150, 255);
-
-    for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
-    {
-        if (player->bullets[curr_bull_ind].is_shoot)
-        {
-            draw_bullet(player, curr_bull_ind);
-        }
-
-        if (player->bullets[curr_bull_ind].is_hit)
-        {
-            draw_hit(player, curr_bull_ind);
-        }
-    }
-}
-
-static float calculate_delta_time(void)
-{
-    static unsigned int last_frame = 0;
-    unsigned int current_frame = SDL_GetTicks();
-    delta_time = (float)(current_frame - last_frame) / 1000.0f;
-    last_frame = current_frame;
-    return delta_time;
-}
-
-static void draw_stats(Tank *player)
-{
-    char angle[100], power[100], points[100], damage[100], weapon[255];
-
-    sprintf(angle, "Current angle: %d", player->muzzle.degrees % 360);
-    sprintf(power, "Current power: %d", player->power);
-    sprintf(points, "Current points: %d", player->points);
-    sprintf(weapon, "Current weapon: %s", player->curr_weapon.weapon_name);
-    sprintf(damage, "+%d", player->curr_weapon.damage);
-
-    draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
-    draw_text(angle, 50, 50, player->color.r, player->color.g, player->color.b);
-    draw_text(power, 50, 80, player->color.r, player->color.g, player->color.b);
-    draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
-
-    if (player->damage_target == DAMAGE_TARGET_OTHER || player->damage_target == DAMAGE_TARGET_BOTH)
-    {
-        draw_text(damage, player->size.x + 20, player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, player->color.r, player->color.g, player->color.b);
-    }
-
-    if (player->damage_target == DAMAGE_TARGET_CURRENT || player->damage_target == DAMAGE_TARGET_BOTH)
-    {
-        draw_text(damage, other_player->size.x + 20, other_player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, other_player->color.r, other_player->color.g, other_player->color.b);
     }
 }
 
@@ -556,17 +486,6 @@ static void update_bullet(Tank *player, int bullet_ind)
 
     player->bullets[bullet_ind].position.x = player->muzzle.end_x + x;
     player->bullets[bullet_ind].position.y = player->muzzle.end_y + y;
-}
-
-static void draw_hit(Tank *player, int bullet_ind)
-{
-    filledCircleRGBA(app.renderer,
-                     player->bullets[bullet_ind].position.x + player->bullets[bullet_ind].position.w / 2,
-                     player->bullets[bullet_ind].position.y + player->bullets[bullet_ind].position.h / 2,
-                     player->bullets[bullet_ind].curr_radius,
-                     255,
-                     141 + player->bullets[bullet_ind].curr_radius,
-                     27, 255);
 }
 
 static void update_hit(Tank *player, int bullet_ind)
@@ -638,6 +557,93 @@ static void update_hit(Tank *player, int bullet_ind)
     }
 }
 
+static void draw(void)
+{
+    draw_pixel_map();
+    draw_player(other_player);
+    draw_player(curr_player);
+
+    if (curr_move == TOTAL_MOVES)
+    {
+        draw_final_screen();
+        return;
+    }
+
+    draw_stats(curr_player);
+}
+
+static void draw_player(Tank *player)
+{
+    if (player->size.y + player->size.h > SCREEN_HEIGHT)
+    {
+        player->size.y = SCREEN_HEIGHT - player->size.h;
+    }
+
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[0].x, player->bounding_box[0].y, player->bounding_box[1].x, player->bounding_box[1].y);
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[1].x, player->bounding_box[1].y, player->bounding_box[2].x, player->bounding_box[2].y);
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[2].x, player->bounding_box[2].y, player->bounding_box[3].x, player->bounding_box[3].y);
+    SDL_RenderDrawLine(app.renderer, player->bounding_box[3].x, player->bounding_box[3].y, player->bounding_box[0].x, player->bounding_box[0].y);
+
+    blit_rotated(player->texture, player->size, FALSE, player->degrees);
+    thickLineRGBA(app.renderer,
+                  player->muzzle.start_x,
+                  player->muzzle.start_y,
+                  player->muzzle.end_x,
+                  player->muzzle.end_y,
+                  player->muzzle.thickness,
+                  150, 150, 150, 255);
+
+    for (int curr_bull_ind = 0; curr_bull_ind < player->curr_weapon.max_bullet_count; curr_bull_ind++)
+    {
+        if (player->bullets[curr_bull_ind].is_shoot)
+        {
+            draw_bullet(player, curr_bull_ind);
+        }
+
+        if (player->bullets[curr_bull_ind].is_hit)
+        {
+            draw_hit(player, curr_bull_ind);
+        }
+    }
+}
+
+static void draw_stats(Tank *player)
+{
+    char angle[100], power[100], points[100], damage[100], weapon[255];
+
+    sprintf(angle, "Current angle: %d", player->muzzle.degrees % 360);
+    sprintf(power, "Current power: %d", player->power);
+    sprintf(points, "Current points: %d", player->points);
+    sprintf(weapon, "Current weapon: %s", player->curr_weapon.weapon_name);
+    sprintf(damage, "+%d", player->curr_weapon.damage);
+
+    draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
+    draw_text(angle, 50, 50, player->color.r, player->color.g, player->color.b);
+    draw_text(power, 50, 80, player->color.r, player->color.g, player->color.b);
+    draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
+
+    if (player->damage_target == DAMAGE_TARGET_OTHER || player->damage_target == DAMAGE_TARGET_BOTH)
+    {
+        draw_text(damage, player->size.x + 20, player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, player->color.r, player->color.g, player->color.b);
+    }
+
+    if (player->damage_target == DAMAGE_TARGET_CURRENT || player->damage_target == DAMAGE_TARGET_BOTH)
+    {
+        draw_text(damage, other_player->size.x + 20, other_player->size.y - 20 - (SDL_GetTicks() - player->touch_time) / 5, other_player->color.r, other_player->color.g, other_player->color.b);
+    }
+}
+
+static void draw_hit(Tank *player, int bullet_ind)
+{
+    filledCircleRGBA(app.renderer,
+                     player->bullets[bullet_ind].position.x + player->bullets[bullet_ind].position.w / 2,
+                     player->bullets[bullet_ind].position.y + player->bullets[bullet_ind].position.h / 2,
+                     player->bullets[bullet_ind].curr_radius,
+                     255,
+                     141 + player->bullets[bullet_ind].curr_radius,
+                     27, 255);
+}
+
 static void draw_bullet(Tank *player, int bullet_ind)
 {
     blit(player->bullets[bullet_ind].texture, &player->bullets[bullet_ind].position, 1);
@@ -664,6 +670,7 @@ static void draw_final_screen(void)
     else
     {
         sprintf(winner_text, "Draw with %d", curr_player->points);
+        sprintf(loser_text, " ");
     }
 
     draw_text(game_over, SCREEN_WIDTH / 2 - 50, 100, 255, 255, 255);
@@ -833,4 +840,14 @@ static void swap_player(void)
     }
 
     curr_move++;
+
+}
+
+static float calculate_delta_time(void)
+{
+    static unsigned int last_frame = 0;
+    unsigned int current_frame = SDL_GetTicks();
+    delta_time = (float)(current_frame - last_frame) / 1000.0f;
+    last_frame = current_frame;
+    return delta_time;
 }
