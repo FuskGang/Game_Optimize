@@ -11,8 +11,11 @@
 #define POWER 60
 #define DELAY_POINTS 1000
 #define DELAY_RADIUS 5
-#define DELAY_INPUT 15
+#define DELAY_HUMAN_INPUT 15
+#define DELAY_BOT_INPUT 15
 #define DELAY_BETWEEN_BULLET 100
+#define SPEED_UP 3
+#define TOTAL_MOVES 3
 
 #include "common.h"
 #include "menu.h"
