@@ -2,11 +2,10 @@
 
 static void draw(void);
 static void update(void);
-int read_leaderboard_file(FILE *i_stream, int *point, char *name);
-void get_leaderboard();
-void sort_leaderboard();
-int *leaderboard_points = NULL;
-char leaderboard_names[MAX_PLAYERS][MAX_NAME_LENGTH];
+static void fill_leaderboard();
+
+LeaderboardEntry *leaderboard_players = NULL;
+int count_leaderboard_players;
 
 void init_leaderboard(void)
 {
@@ -14,189 +13,75 @@ void init_leaderboard(void)
     app.delegate.update = update;
 }
 
-void get_leaderboard()
+static void fill_leaderboard()
 {
-    FILE *leader_file_stream = fopen("assets/leaderboard.txt", "r");
-    leaderboard_points = (int *)(malloc(sizeof(int) * MAX_PLAYERS));
+    FILE *leader_file_stream = fopen("leaderboard.txt", "r");
 
     if (leader_file_stream == NULL)
     {
-        for (int i = 0; i < MAX_PLAYERS; i++)
-        {
-            leaderboard_points[i] = -1;
-            strcpy(leaderboard_names[i], "NONE");
-        }
-
         return;
     }
 
-    int read_row_cnt = 0;
-    int code = 0;
-    int curr_point = 0;
-    char curr_name[MAX_NAME_LENGTH];
+    char read_line[MAX_LINE_LENGTH];
+    char player_name[MAX_NAME_LENGTH];
+    int player_point;
 
-    while (1)
+    while (fgets(read_line, sizeof(read_line), leader_file_stream))
     {
-        code = read_leaderboard_file(leader_file_stream, &curr_point, curr_name);
-
-        leaderboard_points[read_row_cnt] = curr_point;
-        strcpy(leaderboard_names[read_row_cnt], curr_name);
-
-        read_row_cnt++;
-        curr_point = 0;
-
-        if (code == 0)
+        if (sscanf(read_line, "%255[^:]:%d", player_name, &player_point) == 2)
+        {
+            leaderboard_players = (LeaderboardEntry *)(realloc(leaderboard_players, sizeof(LeaderboardEntry) * (count_leaderboard_players + 1)));
+            leaderboard_players[count_leaderboard_players].points = player_point;
+            strcpy(leaderboard_players[count_leaderboard_players++].name, player_name);
+        }
+        else
         {
             break;
         }
-    }
-
-    while (read_row_cnt != MAX_PLAYERS)
-    {
-        leaderboard_points[read_row_cnt++] = -1;
     }
 
     fclose(leader_file_stream);
 }
 
-void sort_leaderboard()
+static int compare_player_points(const void *p1, const void *p2)
 {
-    int tmp_point = 0;
-    char *tmp_name = (char *)(malloc(sizeof(char) * MAX_NAME_LENGTH));
-    char *tmp_name_rpl = (char *)(malloc(sizeof(char) * MAX_NAME_LENGTH));
-    int i, j;
-
-    for (int dist = MAX_PLAYERS / 2; dist > 0; dist /= 2)
-    {
-        for (i = dist; i < MAX_PLAYERS; i++)
-        {
-            tmp_point = leaderboard_points[i];
-            strcpy(tmp_name, leaderboard_names[i]);
-
-            for (j = i; j >= dist && leaderboard_points[j - dist] > tmp_point; j -= dist)
-            {
-                leaderboard_points[j] = leaderboard_points[j - dist];
-                strcpy(leaderboard_names[j], leaderboard_names[j - dist]);
-            }
-
-            leaderboard_points[j] = tmp_point;
-            strcpy(leaderboard_names[j], tmp_name);
-        }
-    }
-
-    free(tmp_name);
-    free(tmp_name_rpl);
+    return (((LeaderboardEntry *)p1)->points - ((LeaderboardEntry *)p2)->points);
 }
 
-void update_leaderboard(int point, char *name)
+static void draw(void)
 {
-    get_leaderboard();
-    sort_leaderboard();
+    char players_stat[MAX_LINE_LENGTH + 20];
 
-    if (point > leaderboard_points[0])
+    if (!count_leaderboard_players)
     {
-        leaderboard_points[0] = point;
+        sprintf(players_stat, "В данный момент таблица лидеров пуста");
+        draw_text(players_stat, 100, 100, 255, 255, 255);
+    }
 
-        strcpy(leaderboard_names[0], name);
-
-        sort_leaderboard();
-
-        FILE *leaderboard_file_stream = fopen("assets/leaderboard.txt", "w");
-
-        for (int i = 0; i < MAX_PLAYERS; i++)
-        {
-            if (i == 0)
-            {
-                fprintf(leaderboard_file_stream, "%s:%d", leaderboard_names[i], leaderboard_points[i]);
-            }
-            else
-            {
-                fprintf(leaderboard_file_stream, "\n%s:%d", leaderboard_names[i], leaderboard_points[i]);
-            }
-        }
+    for (int index_curr_player = 0; index_curr_player < count_leaderboard_players; index_curr_player++)
+    {
+        sprintf(players_stat, "%d) %s - %d point", index_curr_player + 1, leaderboard_players[count_leaderboard_players - index_curr_player - 1].name, leaderboard_players[count_leaderboard_players - index_curr_player - 1].points);
+        draw_text(players_stat, 100, 100 + 20 * index_curr_player, 255, 255, 255);
     }
 }
 
-int read_leaderboard_file(FILE *i_stream, int *point, char *name)
+static void update(void)
 {
-    int sym;
-    int read_sym_cnt = 0;
-
-    while (1)
+    if (leaderboard_players == NULL)
     {
-        sym = fgetc(i_stream);
-
-        if (sym == ':')
-        {
-            break;
-        }
-
-        name[read_sym_cnt++] = sym;
-
-        if (read_sym_cnt == MAX_NAME_LENGTH)
-        {
-            break;
-        }
-    }
-
-    name[read_sym_cnt] = 0;
-    read_sym_cnt = 0;
-
-    while (1)
-    {
-        sym = fgetc(i_stream);
-
-        if (sym == EOF || sym == '\n')
-        {
-            break;
-        }
-
-        (*point) = (*point * 10) + (sym - '0');
-        read_sym_cnt++;
-    }
-
-    if (sym == EOF)
-    {
-        return 0;
-    }
-
-    return 1;
-}
-
-void draw(void)
-{
-    char player_stat[MAX_NAME_LENGTH + 20];
-
-    for (int cnt_player = 0; cnt_player < MAX_PLAYERS; cnt_player++)
-    {
-        if (leaderboard_points != NULL && leaderboard_points[MAX_PLAYERS - cnt_player - 1] != -1)
-        {
-            sprintf(player_stat, "%d) %s - %d", cnt_player + 1, leaderboard_names[MAX_PLAYERS - cnt_player - 1], leaderboard_points[MAX_PLAYERS - cnt_player - 1]);
-        }
-        else
-        {
-            sprintf(player_stat, "%d) NONE  - NONE", cnt_player + 1);
-        }
-
-        draw_text(player_stat, 100, 100 + 20 * cnt_player, 255, 255, 255);
-
-    }
-}
-
-void update(void)
-{
-    if (leaderboard_points == NULL)
-    {
-        get_leaderboard();
-        sort_leaderboard();
+        fill_leaderboard();
+        qsort((void *)leaderboard_players, count_leaderboard_players, sizeof(LeaderboardEntry), compare_player_points);
     }
 
     if (app.keyboard[SDL_SCANCODE_ESCAPE])
     {
         app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
 
-        free(leaderboard_points);
-        leaderboard_points = NULL;
+        free(leaderboard_players);
+
+        leaderboard_players = NULL;
+        count_leaderboard_players = 0;
+
         init_menu();
     }
 }
