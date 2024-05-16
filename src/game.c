@@ -62,8 +62,8 @@ static void init_player(void)
                "assets/Bullet2.png", 255, 0, 0,
                "assets/Tank.png");
 
-    player1->is_bot = SDL_FALSE;
-    player2->is_bot = SDL_FALSE;
+    player1->is_bot = SDL_TRUE;
+    player2->is_bot = SDL_TRUE;
     curr_move = 0;
 
     drop_player(player1);
