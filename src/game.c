@@ -2,13 +2,12 @@
 
 static void update(void);
 static void draw(void);
-static void init_player(void);
+static void init_player(Weapon *left_weapons, Weapon *right_weapons);
 static void get_player(Tank *player, char *name,
                        int player_r, int player_g, int player_b,
                        int size_x, int size_y,
                        char *bullet_texture_path, int bullet_r, int bullet_g, int bullet_b,
                        char *player_texture_path);
-static void get_weapon(Weapon *weapon, char *name, int damage, int max_radius, int max_bullet_count);
 static void drop_player(Tank *);
 static void draw_player(Tank *);
 static void draw_stats(Tank *);
@@ -34,21 +33,24 @@ static Tank *curr_player;
 static Tank *other_player;
 static float delta_time;
 
-void init_game(void)
+void init_game(Weapon *left_weapons, Weapon *right_weapons)
 {
     init_map();
-    init_player();
+    init_player(left_weapons, right_weapons);
 
     app.delegate.update = update;
     app.delegate.draw = draw;
 }
 
-static void init_player(void)
+static void init_player(Weapon *left_weapons, Weapon *right_weapons)
 {
     player1 = malloc(sizeof(Tank));
     player2 = malloc(sizeof(Tank));
     curr_player = player1;
     other_player = player2;
+
+    player1->weapons = left_weapons;
+    player2->weapons = right_weapons;
 
     get_player(player1, "Test",
                255, 255, 0,
@@ -118,21 +120,7 @@ static void get_player(Tank *player, char *name,
     player->damage_target = DAMAGE_TARGET_NONE;
     player->is_shoot = 0;
 
-    get_weapon(&player->weapons[0], "Default", 10, 40, 1);
-    get_weapon(&player->weapons[1], "Deagle", 35, 25, 1);
-    get_weapon(&player->weapons[2], "Minigun", 5, 12, 5);
-
     player->curr_weapon = player->weapons[0];
-}
-
-static void get_weapon(Weapon *weapon, char *weapon_name, int damage, int max_radius, int max_bullet_count)
-{
-    strcpy(weapon->weapon_name, weapon_name);
-    weapon->damage = damage;
-    weapon->max_radius = max_radius;
-    weapon->max_bullet_count = max_bullet_count;
-    weapon->current_bullet_count = 0;
-    weapon->hit_bullet_count = 0;
 }
 
 static void drop_player(Tank *player)
@@ -584,7 +572,7 @@ static void draw_player(Tank *player)
     SDL_RenderDrawLine(app.renderer, player->bounding_box[2].x, player->bounding_box[2].y, player->bounding_box[3].x, player->bounding_box[3].y);
     SDL_RenderDrawLine(app.renderer, player->bounding_box[3].x, player->bounding_box[3].y, player->bounding_box[0].x, player->bounding_box[0].y);
 
-    blit_rotated(player->texture, player->size, FALSE, player->degrees);
+    blit_rotated(player->texture, &player->size, FALSE, player->degrees);
     thickLineRGBA(app.renderer,
                   player->muzzle.start_x,
                   player->muzzle.start_y,
@@ -835,12 +823,11 @@ static void swap_player(void)
 
     if (curr_player->is_bot)
     {
-        curr_player->curr_weapon = curr_player->weapons[rand() % 3];
+        curr_player->curr_weapon = curr_player->weapons[rand() % TOTAL_WEAPONS / 2];
         curr_player->power = (rand() % 60 + 20);
     }
 
     curr_move++;
-
 }
 
 static float calculate_delta_time(void)

@@ -18,6 +18,7 @@ typedef struct
 	int max_bullet_count;
 	int current_bullet_count;
 	int hit_bullet_count;
+	SDL_Texture *texture;
 } Weapon;
 
 typedef struct
@@ -53,7 +54,7 @@ typedef struct
 	Muzzle muzzle;
 	Bullet bullets[MAX_BULLET];
 	Weapon curr_weapon;
-	Weapon weapons[3];
+	Weapon *weapons;
 	int power;
 	char damage_target;
 	Uint32 touch_time;

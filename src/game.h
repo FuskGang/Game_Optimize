@@ -39,7 +39,7 @@ typedef enum
     DAMAGE_TARGET_BOTH
 } damage_target;
 
-void init_game(void);
+void init_game(Weapon *left_weapons, Weapon *right_weapons);
 
 extern int pixel_map[SCREEN_WIDTH][SCREEN_HEIGHT];
 #endif /* GAME */
