@@ -5,6 +5,7 @@
 #include "common.h"
 #include "draw.h"
 #include "menu.h"
+#include "utils.h"
 #include "game.h"
 
 

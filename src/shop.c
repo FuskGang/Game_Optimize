@@ -8,7 +8,6 @@ static void draw_right_weapons(void);
 static void update(void);
 static void do_weapon_choice(void);
 static Weapon *get_weapon(char *weapon_name, int damage, int max_radius, int max_bullet_count, SDL_Texture *texture);
-static void shuffle(int *array, size_t n);
 
 static SDL_Texture *default_texture;
 static SDL_Texture *deagle_texture;
@@ -185,17 +184,3 @@ static Weapon *get_weapon(char *weapon_name, int damage, int max_radius, int max
     return weapon;
 }
 
-static void shuffle(int *array, size_t n)
-{
-    if (n > 1)
-    {
-        size_t i;
-        for (i = 0; i < n - 1; i++)
-        {
-            size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-            int t = array[j];
-            array[j] = array[i];
-            array[i] = t;
-        }
-    }
-}
