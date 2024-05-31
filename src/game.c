@@ -2,7 +2,7 @@
 
 static void update(void);
 static void draw(void);
-static void init_player(Weapon *left_weapons, Weapon *right_weapons);
+static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_coord, SDL_bool is_bot);
 static void get_player(Tank *player, char *name,
                        int player_r, int player_g, int player_b,
                        int size_x, int size_y,
@@ -19,6 +19,7 @@ static void update_hit(Tank *, int);
 static void draw_hit(Tank *, int);
 static void draw_bullet(Tank *, int);
 static void draw_final_screen(void);
+static void free_resources(void);
 static void drop_earth(int, int, int);
 static SDL_bool do_test_shoot(void);
 static collision check_earth_collision(Bullet);
@@ -33,43 +34,57 @@ static Tank *curr_player;
 static Tank *other_player;
 static float delta_time;
 
-void init_game(Weapon *left_weapons, Weapon *right_weapons)
+void init_game(ArsenalItem *left_arsenal, ArsenalItem *right_arsenal)
 {
     init_map();
-    init_player(left_weapons, right_weapons);
+
+    player1 = malloc(sizeof(Tank));
+    player2 = malloc(sizeof(Tank));
+
+    init_player(player1, left_arsenal, "First player", 100, SDL_TRUE);
+    init_player(player2, right_arsenal, "Second player", SCREEN_WIDTH - 400, SDL_TRUE);
+
+    curr_player = player1;
+    other_player = player2;
 
     app.delegate.update = update;
     app.delegate.draw = draw;
 }
 
-static void init_player(Weapon *left_weapons, Weapon *right_weapons)
+static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_coord, SDL_bool is_bot)
 {
-    player1 = malloc(sizeof(Tank));
-    player2 = malloc(sizeof(Tank));
-    curr_player = player1;
-    other_player = player2;
+    player->arsenal = arsenal;
 
-    player1->weapons = left_weapons;
-    player2->weapons = right_weapons;
-
-    get_player(player1, "Test",
-               255, 255, 0,
-               100, 0,
+    get_player(player, name,
+               rand() % 156 + 100, rand() % 156 + 100, rand() % 156 + 100,
+               x_coord, 0,
                "assets/Bullet2.png", 255, 0, 0,
                "assets/Tank.png");
 
-    get_player(player2, "Test2",
-               46, 218, 255,
-               SCREEN_WIDTH - 800, 0,
-               "assets/Bullet2.png", 255, 0, 0,
-               "assets/Tank.png");
+    player->is_bot = is_bot;
 
-    player1->is_bot = SDL_TRUE;
-    player2->is_bot = SDL_TRUE;
+    srand(time(NULL));
+
+    for (int i = 0; i < arsenal[0].count; i++)
+    {
+        player->weapon_order[i] = 0;
+    }
+
+    for (int i = arsenal[0].count; i < arsenal[0].count + arsenal[1].count; i++)
+    {
+        player->weapon_order[i] = 1;
+    }
+
+    for (int i = arsenal[0].count + arsenal[1].count; i < TOTAL_WEAPONS / 2; i++)
+    {
+        player->weapon_order[i] = 2;
+    }
+
+    shuffle(player->weapon_order, TOTAL_WEAPONS / 2);
+
     curr_move = 0;
 
-    drop_player(player1);
-    drop_player(player2);
+    drop_player(player);
 }
 
 static void get_player(Tank *player, char *name,
@@ -120,7 +135,7 @@ static void get_player(Tank *player, char *name,
     player->damage_target = DAMAGE_TARGET_NONE;
     player->is_shoot = 0;
 
-    player->curr_weapon = player->weapons[0];
+    player->curr_weapon = player->arsenal[0].weapon;
 }
 
 static void drop_player(Tank *player)
@@ -168,6 +183,7 @@ static void do_human_input(Tank *player)
     if (app.keyboard[SDL_SCANCODE_ESCAPE])
     {
         app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
+        free_resources();
         init_menu();
     }
 
@@ -191,21 +207,21 @@ static void do_human_input(Tank *player)
     {
         player->input_time = SDL_GetTicks();
 
-        player->curr_weapon = player->weapons[0];
+        player->curr_weapon = player->arsenal[0].weapon;
     }
 
     if (app.keyboard[SDL_SCANCODE_2])
     {
         player->input_time = SDL_GetTicks();
 
-        player->curr_weapon = player->weapons[1];
+        player->curr_weapon = player->arsenal[1].weapon;
     }
 
     if (app.keyboard[SDL_SCANCODE_3])
     {
         player->input_time = SDL_GetTicks();
 
-        player->curr_weapon = player->weapons[2];
+        player->curr_weapon = player->arsenal[2].weapon;
     }
 
     if (app.keyboard[SDL_SCANCODE_RIGHT])
@@ -293,6 +309,7 @@ static void do_bot_input(Tank *bot)
     if (app.keyboard[SDL_SCANCODE_ESCAPE])
     {
         app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
+        free_resources();
         init_menu();
     }
 
@@ -308,7 +325,7 @@ static void do_bot_input(Tank *bot)
 
     is_success_shoot = do_test_shoot();
 
-    if (bot->power < 50)
+    if (bot->power < 60)
     {
         bot->input_time = SDL_GetTicks();
 
@@ -597,17 +614,19 @@ static void draw_player(Tank *player)
 
 static void draw_stats(Tank *player)
 {
-    char angle[100], power[100], points[100], damage[100], weapon[255];
+    char angle[100], power[100], points[100], damage[100], weapon[255], move[100];
 
-    sprintf(angle, "Current angle: %d", player->muzzle.degrees % 360);
-    sprintf(power, "Current power: %d", player->power);
-    sprintf(points, "Current points: %d", player->points);
-    sprintf(weapon, "Current weapon: %s", player->curr_weapon.weapon_name);
+    sprintf(angle, "Угол: %d", player->muzzle.degrees % 360);
+    sprintf(power, "Мощность: %d", player->power);
+    sprintf(points, "Очки: %d", player->points);
+    sprintf(move, "Текущий ход: %d", curr_move + 1);
+    sprintf(weapon, "Оружие: %s", player->curr_weapon.weapon_name);
     sprintf(damage, "+%d", player->curr_weapon.damage);
 
     draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
     draw_text(angle, 50, 50, player->color.r, player->color.g, player->color.b);
     draw_text(power, 50, 80, player->color.r, player->color.g, player->color.b);
+    draw_text(move, SCREEN_WIDTH / 2 - 60, 5, 255, 255, 255);
     draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
 
     if (player->damage_target == DAMAGE_TARGET_OTHER || player->damage_target == DAMAGE_TARGET_BOTH)
@@ -665,11 +684,14 @@ static void draw_final_screen(void)
     draw_text(winner_text, SCREEN_WIDTH / 2 - 50, 120, 255, 255, 255);
     draw_text(loser_text, SCREEN_WIDTH / 2 - 50, 140, 255, 255, 255);
     draw_text(press_key, SCREEN_WIDTH / 2 - 50, 160, 255, 255, 255);
+}
 
-    if (app.keyboard[SDL_SCANCODE_ESCAPE])
-    {
-        init_menu();
-    }
+static void free_resources(void)
+{
+    free(player1->arsenal);
+    free(player2->arsenal);
+    free(player1);
+    free(player2);
 }
 
 static void drop_earth(int x, int y, int r)
@@ -819,15 +841,14 @@ static void swap_player(void)
     {
         curr_player = player1;
         other_player = player2;
+        curr_move++;
     }
 
     if (curr_player->is_bot)
     {
-        curr_player->curr_weapon = curr_player->weapons[rand() % TOTAL_WEAPONS / 2];
+        curr_player->curr_weapon = curr_player->arsenal[curr_player->weapon_order[curr_move / 2]].weapon;
         curr_player->power = (rand() % 60 + 20);
     }
-
-    curr_move++;
 }
 
 static float calculate_delta_time(void)

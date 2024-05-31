@@ -6,15 +6,17 @@ static void draw_shop(void);
 static void draw_left_weapons(void);
 static void draw_right_weapons(void);
 static void update(void);
+static ArsenalItem *make_arsenal(void);
 static void do_weapon_choice(void);
 static Weapon *get_weapon(char *weapon_name, int damage, int max_radius, int max_bullet_count, SDL_Texture *texture);
 
 static SDL_Texture *default_texture;
 static SDL_Texture *deagle_texture;
 static SDL_Texture *minigun_texture;
-static Weapon weapons[TOTAL_WEAPONS], left_weapons[TOTAL_WEAPONS / 2], right_weapons[TOTAL_WEAPONS / 2];
+static Weapon weapons[TOTAL_WEAPONS], left_weapons[TOTAL_WEAPONS / 2], right_weapons[TOTAL_WEAPONS / 2], *weapon_storage[3];
 static int remaining_weapons = TOTAL_WEAPONS, is_space_pressed = 0, index_order[TOTAL_WEAPONS];
 static Uint32 last_time;
+static ArsenalItem *left_arsenal, *right_arsenal;
 
 void init_shop(void)
 {
@@ -25,11 +27,12 @@ void init_shop(void)
     deagle_texture = load_texture("assets/deagle.png");
     minigun_texture = load_texture("assets/minigun.png");
 
-    Weapon *weapon_storage[3];
-
     weapon_storage[0] = get_weapon("Default", 10, 40, 1, default_texture);
     weapon_storage[1] = get_weapon("Deagle", 35, 25, 1, deagle_texture);
     weapon_storage[2] = get_weapon("Minigun", 5, 12, 5, minigun_texture);
+
+    left_arsenal = make_arsenal();
+    right_arsenal = make_arsenal();
 
     srand(time(NULL));
 
@@ -144,10 +147,29 @@ void update(void)
         do_weapon_choice();
     }
 
-    if (remaining_weapons == 0 && SDL_GetTicks() - last_time > 2000)
+    if (remaining_weapons == 0 && SDL_GetTicks() - last_time > 1000)
     {
-        init_game(left_weapons, right_weapons);
+        for (int i = 0; i < 3; i++)
+        {
+            free(weapon_storage[i]);
+        }
+        
+        init_game(left_arsenal, right_arsenal);
     }
+}
+
+static ArsenalItem *make_arsenal(void)
+{
+    int weapons_count = 3;
+
+    ArsenalItem *arsenal = (ArsenalItem *)calloc(weapons_count, sizeof(ArsenalItem));
+
+    for (int i = 0; i < weapons_count; i++)
+    {
+        arsenal[i].weapon = *weapon_storage[i];
+    }
+
+    return arsenal;
 }
 
 static void do_weapon_choice(void)
@@ -158,10 +180,26 @@ static void do_weapon_choice(void)
         if (remaining_weapons % 2 == 0)
         {
             left_weapons[(TOTAL_WEAPONS - remaining_weapons + 1) / 2] = weapons[index];
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (strcmp(left_weapons[(TOTAL_WEAPONS - remaining_weapons + 1) / 2].weapon_name, left_arsenal[i].weapon.weapon_name) == 0)
+                {
+                    left_arsenal[i].count++;
+                }
+            }
         }
         else
         {
             right_weapons[(TOTAL_WEAPONS - remaining_weapons) / 2] = weapons[index];
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (strcmp(right_weapons[(TOTAL_WEAPONS - remaining_weapons) / 2].weapon_name, right_arsenal[i].weapon.weapon_name) == 0)
+                {
+                    right_arsenal[i].count++;
+                }
+            }
         }
         weapons[index].texture = NULL;
         remaining_weapons--;
@@ -183,4 +221,3 @@ static Weapon *get_weapon(char *weapon_name, int damage, int max_radius, int max
 
     return weapon;
 }
-
