@@ -11,6 +11,7 @@ static void get_player(Tank *player, char *name,
 static void drop_player(Tank *);
 static void draw_player(Tank *);
 static void draw_stats(Tank *);
+static void draw_arsenal(Tank *);
 static void do_human_input(Tank *);
 static void do_bot_input(Tank *);
 static void update_bullet(Tank *, int);
@@ -381,6 +382,7 @@ static void do_bot_input(Tank *bot)
     else
     {
         bot->is_shoot = 1;
+        bot->arsenal[curr_player->weapon_order[curr_move / 2]].count--;
         return;
     }
 }
@@ -573,6 +575,7 @@ static void draw(void)
     draw_pixel_map();
     draw_player(other_player);
     draw_player(curr_player);
+    draw_arsenal(curr_player);
 
     if (curr_move == TOTAL_MOVES)
     {
@@ -630,10 +633,10 @@ static void draw_stats(Tank *player)
     sprintf(damage, "+%d", player->curr_weapon.damage);
 
     draw_text(points, 50, 20, player->color.r, player->color.g, player->color.b);
-    draw_text(angle, 50, 50, player->color.r, player->color.g, player->color.b);
-    draw_text(power, 50, 80, player->color.r, player->color.g, player->color.b);
+    draw_text(angle, 50, 40, player->color.r, player->color.g, player->color.b);
+    draw_text(power, 50, 60, player->color.r, player->color.g, player->color.b);
+    draw_text(weapon, 50, 80, player->color.r, player->color.g, player->color.b);
     draw_text(move, SCREEN_WIDTH / 2 - 60, 5, 255, 255, 255);
-    draw_text(weapon, 50, 110, player->color.r, player->color.g, player->color.b);
 
     if (player->damage_target == DAMAGE_TARGET_OTHER || player->damage_target == DAMAGE_TARGET_BOTH)
     {
@@ -690,6 +693,17 @@ static void draw_final_screen(void)
     draw_text(winner_text, SCREEN_WIDTH / 2 - 50, 120, 255, 255, 255);
     draw_text(loser_text, SCREEN_WIDTH / 2 - 50, 140, 255, 255, 255);
     draw_text(press_key, SCREEN_WIDTH / 2 - 50, 160, 255, 255, 255);
+}
+
+static void draw_arsenal(Tank *player)
+{
+    char arsenal[500] = "";
+
+    for (int i = 0; i < 3; i++)
+    {
+        sprintf(arsenal, "%s: %d", player->arsenal[i].weapon.weapon_name, player->arsenal[i].count);
+        draw_text(arsenal, SCREEN_WIDTH - 300, 20 * (i + 1), 255, 255, 255);
+    }
 }
 
 static void free_resources(void)
