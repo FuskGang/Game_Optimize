@@ -8,6 +8,7 @@
 #include "textures.h"
 #include "shop.h"
 #include "about.h"
+#include "leaderboard.h"
 
 void init_menu(void);
 
