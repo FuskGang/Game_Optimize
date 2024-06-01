@@ -84,6 +84,7 @@ static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_co
     shuffle(player->weapon_order, TOTAL_WEAPONS / 2);
 
     curr_move = 0;
+    player->curr_weapon = player->arsenal[player->weapon_order[curr_move]].weapon;
 
     drop_player(player);
 }
@@ -135,8 +136,6 @@ static void get_player(Tank *player, char *name,
     player->points = 0;
     player->damage_target = DAMAGE_TARGET_NONE;
     player->is_shoot = 0;
-
-    player->curr_weapon = player->arsenal[0].weapon;
 }
 
 static void drop_player(Tank *player)
@@ -382,7 +381,7 @@ static void do_bot_input(Tank *bot)
     else
     {
         bot->is_shoot = 1;
-        bot->arsenal[curr_player->weapon_order[curr_move / 2]].count--;
+        bot->arsenal[curr_player->weapon_order[curr_move]].count--;
         return;
     }
 }
@@ -864,9 +863,9 @@ static void swap_player(void)
         curr_move++;
     }
 
-    if (curr_player->is_bot)
+    if (curr_player->is_bot && curr_move != TOTAL_MOVES)
     {
-        curr_player->curr_weapon = curr_player->arsenal[curr_player->weapon_order[curr_move / 2]].weapon;
+        curr_player->curr_weapon = curr_player->arsenal[curr_player->weapon_order[curr_move]].weapon;
         curr_player->power = (rand() % 60 + 20);
     }
 }
