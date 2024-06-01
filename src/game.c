@@ -391,6 +391,12 @@ static void update(void)
 
     if (curr_move == TOTAL_MOVES)
     {
+        if (app.keyboard[SDL_SCANCODE_ESCAPE])
+        {
+            app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
+            free_resources();
+            init_menu();
+        }
         return;
     }
 
@@ -658,25 +664,25 @@ static void draw_bullet(Tank *player, int bullet_ind)
 
 static void draw_final_screen(void)
 {
-    char game_over[355] = "", winner_text[355] = "", loser_text[355] = "", press_key[] = "Press esc to exit game";
+    char game_over[355] = "", winner_text[355] = "", loser_text[355] = "", press_key[] = "Для выхода нажмите esc";
 
-    sprintf(game_over, "Game over!");
+    sprintf(game_over, "Игра окончена!");
 
     if (curr_player->points > other_player->points)
     {
-        sprintf(winner_text, "Winner - %s with %d points", curr_player->player_name, curr_player->points);
-        sprintf(loser_text, "Loser - %s with %d points", other_player->player_name, other_player->points);
+        sprintf(winner_text, "Победитель - %s с %d очков", curr_player->player_name, curr_player->points);
+        sprintf(loser_text, "Проигравший - %s с %d очков", other_player->player_name, other_player->points);
     }
 
     else if (curr_player->points < other_player->points)
     {
-        sprintf(winner_text, "Winner - %s with %d points", other_player->player_name, other_player->points);
-        sprintf(loser_text, "Loser - %s with %d points", curr_player->player_name, curr_player->points);
+        sprintf(winner_text, "Победитель - %s с %d очков", other_player->player_name, other_player->points);
+        sprintf(loser_text, "Проигравший - %s с %d очков", curr_player->player_name, curr_player->points);
     }
 
     else
     {
-        sprintf(winner_text, "Draw with %d", curr_player->points);
+        sprintf(winner_text, "Ничья с %d очков", curr_player->points);
         sprintf(loser_text, " ");
     }
 
