@@ -11,8 +11,11 @@
 #define POWER 60
 #define DELAY_POINTS 1000
 #define DELAY_RADIUS 5
-#define DELAY_INPUT 15
+#define DELAY_HUMAN_INPUT 15
+#define DELAY_BOT_INPUT 15
 #define DELAY_BETWEEN_BULLET 100
+#define SPEED_UP 3
+#define TOTAL_MOVES TOTAL_WEAPONS / 2
 
 #include "common.h"
 #include "menu.h"
@@ -36,7 +39,7 @@ typedef enum
     DAMAGE_TARGET_BOTH
 } damage_target;
 
-void init_game(void);
+void init_game(ArsenalItem *left_arsenal, ArsenalItem *right_arsenal);
 
 extern int pixel_map[SCREEN_WIDTH][SCREEN_HEIGHT];
 #endif /* GAME */

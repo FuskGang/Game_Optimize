@@ -6,7 +6,7 @@
 
 typedef struct
 {
-	void (*update)(void);
+	void (*update)(void); 
 	void (*draw)(void);
 } Delegate;
 
@@ -18,7 +18,14 @@ typedef struct
 	int max_bullet_count;
 	int current_bullet_count;
 	int hit_bullet_count;
+	SDL_Texture *texture;
 } Weapon;
+
+typedef struct
+{
+	Weapon weapon;
+	int count;
+} ArsenalItem;
 
 typedef struct
 {
@@ -53,7 +60,8 @@ typedef struct
 	Muzzle muzzle;
 	Bullet bullets[MAX_BULLET];
 	Weapon curr_weapon;
-	Weapon weapons[3];
+	ArsenalItem *arsenal;
+	int weapon_order[TOTAL_WEAPONS / 2];
 	int power;
 	char damage_target;
 	Uint32 touch_time;
@@ -63,6 +71,7 @@ typedef struct
 	SDL_Point second_base_pixel;
 	int degrees;
 	char is_shoot;
+	SDL_bool is_bot;
 } Tank;
 
 typedef struct Widget

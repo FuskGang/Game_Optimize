@@ -12,3 +12,18 @@ void rotate_point(int x, int y, int cx, int cy, int degrees, int *new_x, int *ne
     *new_x = cos(radians) * (x - cx) - sin(radians) * (y - cy) + cx;
     *new_y = sin(radians) * (x - cx) + cos(radians) * (y - cy) + cy;
 }
+
+void shuffle(int *array, size_t n)
+{
+    if (n > 1)
+    {
+        size_t i;
+        for (i = 0; i < n - 1; i++)
+        {
+            size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+            int t = array[j];
+            array[j] = array[i];
+            array[i] = t;
+        }
+    }
+}
