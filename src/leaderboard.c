@@ -13,6 +13,36 @@ void init_leaderboard(void)
     app.delegate.update = update;
 }
 
+static int compare_player_points(const void *p1, const void *p2)
+{
+    return (((LeaderboardEntry *)p1)->points - ((LeaderboardEntry *)p2)->points);
+}
+
+void update_leaderboard(int points, char *name)
+{
+    fill_leaderboard();
+
+    leaderboard_players = (LeaderboardEntry *)(realloc(leaderboard_players, sizeof(LeaderboardEntry) * (count_leaderboard_players + 1)));
+
+    leaderboard_players[count_leaderboard_players].points = points;
+    strcpy(leaderboard_players[count_leaderboard_players++].name, name);
+
+    FILE *leader_file_stream = fopen("leaderboard.txt", "w");
+    qsort((void *)leaderboard_players, count_leaderboard_players, sizeof(LeaderboardEntry), compare_player_points);
+
+    for (int index_curr_player = 0; index_curr_player < SDL_min(count_leaderboard_players, MAX_PLAYERS); index_curr_player++)
+    {
+        fprintf(leader_file_stream, "%s:%d\n", leaderboard_players[count_leaderboard_players - index_curr_player - 1].name, leaderboard_players[count_leaderboard_players - index_curr_player - 1].points);
+    }
+
+    printf("%d\n", count_leaderboard_players);
+
+    fclose(leader_file_stream);
+    free(leaderboard_players);
+    leaderboard_players = NULL;
+    count_leaderboard_players = 0;
+}
+
 static void fill_leaderboard()
 {
     FILE *leader_file_stream = fopen("leaderboard.txt", "r");
@@ -41,11 +71,6 @@ static void fill_leaderboard()
     }
 
     fclose(leader_file_stream);
-}
-
-static int compare_player_points(const void *p1, const void *p2)
-{
-    return (((LeaderboardEntry *)p1)->points - ((LeaderboardEntry *)p2)->points);
 }
 
 static void draw(void)
