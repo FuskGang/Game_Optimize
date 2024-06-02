@@ -59,7 +59,7 @@ typedef struct
 	SDL_Point bounding_box[4];
 	Muzzle muzzle;
 	Bullet bullets[MAX_BULLET];
-	Weapon curr_weapon;
+	ArsenalItem *curr_item;
 	ArsenalItem *arsenal;
 	int weapon_order[TOTAL_WEAPONS / 2];
 	int power;
