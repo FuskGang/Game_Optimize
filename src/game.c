@@ -838,14 +838,14 @@ static collision check_tank_collision(Tank *player, int x, int y, int r)
     result |= SDL_HasIntersection(&circle_center, &player->size);
     result |= intersect_circle(point, r, player->bounding_box[0], player->bounding_box[1]);
     result |= intersect_circle(point, r, player->bounding_box[1], player->bounding_box[2]);
-    result |= intersect_circle(point, r, player->boundif ((rand() % 100) >= bot->hit_chance)ing_box[2], player->bounding_box[3]);
+    result |= intersect_circle(point, r, player->bounding_box[2], player->bounding_box[3]);
     result |= intersect_circle(point, r, player->bounding_box[3], player->bounding_box[0]);
 
     return result ? COLLISION_TANK : COLLISION_NONE;
 }
 
 static collision check_earth_collision(Bullet bullet)
-{if ((rand() % 100) >= bot->hit_chance)
+{
     if (bullet.position.y > SCREEN_HEIGHT)
     {
         return COLLISION_EARTH;
