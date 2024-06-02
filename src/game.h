@@ -22,6 +22,7 @@
 #include "map.h"
 #include "draw.h"
 #include "utils.h"
+#include "leaderboard.h"
 #include <SDL2/SDL2_gfxPrimitives.h>
 
 typedef enum
