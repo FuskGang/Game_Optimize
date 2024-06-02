@@ -42,8 +42,8 @@ void init_game(ArsenalItem *left_arsenal, ArsenalItem *right_arsenal)
     player1 = malloc(sizeof(Tank));
     player2 = malloc(sizeof(Tank));
 
-    init_player(player1, left_arsenal, "First player", 100, SDL_TRUE);
-    init_player(player2, right_arsenal, "Second player", SCREEN_WIDTH - 400, SDL_TRUE);
+    init_player(player1, left_arsenal, "First player", 100, SDL_FALSE);
+    init_player(player2, right_arsenal, "Second player", SCREEN_WIDTH - 400, SDL_FALSE);
 
     curr_player = player1;
     other_player = player2;
@@ -288,6 +288,12 @@ static void do_human_input(Tank *player)
         }
     }
 
+    if (app.keyboard[SDL_SCANCODE_B])
+    {
+        update_leaderboard(rand(), "LOL");
+        player->input_time = SDL_GetTicks();
+    }
+
     // if (app.keyboard[SDL_SCANCODE_B])
     // {
     //     if (do_test_shoot() == SDL_FALSE)
@@ -398,6 +404,7 @@ static void update(void)
             free_resources();
             init_menu();
         }
+
         return;
     }
 
@@ -861,6 +868,12 @@ static void swap_player(void)
         curr_player = player1;
         other_player = player2;
         curr_move++;
+    }
+
+    if (curr_move == TOTAL_MOVES)
+    {
+        update_leaderboard(curr_player->points, curr_player->player_name);
+        update_leaderboard(other_player->points, other_player->player_name);
     }
 
     if (curr_player->is_bot && curr_move != TOTAL_MOVES)
