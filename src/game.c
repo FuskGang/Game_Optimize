@@ -24,6 +24,8 @@ static void free_resources(void);
 static void drop_earth(int, int, int);
 static SDL_bool do_test_shoot(void);
 static collision check_earth_collision(Bullet);
+static double distance(SDL_Point p1, SDL_Point p2);
+static SDL_bool intersect_circle(SDL_Point circle_center, int radius, SDL_Point a, SDL_Point b);
 static collision check_tank_collision(Tank *, int, int, int);
 static void swap_player(void);
 static float calculate_delta_time(void);
@@ -770,16 +772,14 @@ static SDL_bool do_test_shoot(void)
     test_bullet.position.h = 10;
     test_bullet.position.w = 10;
 
-    for (double t = 0.0f; t < 30.0f; t = t + 0.00001)
+    for (double t = 0.0f; t < 30.0f; t = t + 0.01)
     {
-        if (check_earth_collision(test_bullet) == COLLISION_EARTH || check_earth_collision(test_bullet) == COLLISION_TANK)
+        if (check_earth_collision(test_bullet) != COLLISION_NONE)
         {
-
             if (check_tank_collision(other_player, bullet_poz_x + BULLET_W / 2, bullet_poz_y + BULLET_H / 2, curr_player->curr_item->weapon.max_radius) == COLLISION_TANK)
             {
                 return SDL_TRUE;
             }
-
             return SDL_FALSE;
         }
 
@@ -796,38 +796,45 @@ static SDL_bool do_test_shoot(void)
     return SDL_FALSE;
 }
 
+static double distance(SDL_Point p1, SDL_Point p2)
+{
+    return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
+}
+
+static SDL_bool intersect_circle(SDL_Point circle_center, int radius, SDL_Point a, SDL_Point b)
+{
+    SDL_Point d;
+    double abx = b.x - a.x;
+    double aby = b.y - a.y;
+    double dacab = (circle_center.x - a.x) * abx + (circle_center.y - a.y) * aby;
+    double dab = abx * abx + aby * aby;
+    double t = dacab / dab;
+    d.x = a.x + abx * t;
+    d.y = a.y + aby * t;
+
+    if (distance(circle_center, d) <= radius)
+    {
+        if ((a.x < d.x && d.x < b.x) || (b.x < d.x && d.x < a.x))
+        {
+            return SDL_TRUE;
+        }
+    }
+
+    return SDL_FALSE;
+}
+
 static collision check_tank_collision(Tank *player, int x, int y, int r)
 {
-    const int w1[2] = {player->bounding_box[0].x, player->bounding_box[0].y};
-    const int w2[2] = {player->bounding_box[1].x, player->bounding_box[1].y};
-    const int w3[2] = {player->bounding_box[2].x, player->bounding_box[2].y};
-    const int w4[2] = {player->bounding_box[3].x, player->bounding_box[3].y};
+    SDL_Rect circle_center = {x, y, 1, 1};
+    SDL_Point point = {x, y};
+    SDL_bool result = SDL_FALSE;
+    result |= SDL_HasIntersection(&circle_center, &player->size);
+    result |= intersect_circle(point, r, player->bounding_box[0], player->bounding_box[1]);
+    result |= intersect_circle(point, r, player->bounding_box[1], player->bounding_box[2]);
+    result |= intersect_circle(point, r, player->bounding_box[2], player->bounding_box[3]);
+    result |= intersect_circle(point, r, player->bounding_box[3], player->bounding_box[0]);
 
-    double d1 = SDL_sqrt((SDL_pow((double)(x - w1[0]), 2.0f) + SDL_pow((double)(y - w1[1]), 2.0f)));
-    double d2 = SDL_sqrt((SDL_pow((double)(x - w2[0]), 2.0f) + SDL_pow((double)(y - w2[1]), 2.0f)));
-    double d3 = SDL_sqrt((SDL_pow((double)(x - w3[0]), 2.0f) + SDL_pow((double)(y - w3[1]), 2.0f)));
-    double d4 = SDL_sqrt((SDL_pow((double)(x - w4[0]), 2.0f) + SDL_pow((double)(y - w4[1]), 2.0f)));
-    double d_r = (double)(r);
-
-    if (d1 < d_r || d2 < d_r || d3 < d_r || d4 < d_r)
-    {
-        return COLLISION_TANK;
-    }
-
-    if (x > w1[0] && x < w4[0] && y > w1[1] && y < w4[1])
-    {
-        return COLLISION_TANK;
-    }
-
-    if (((x + r) > w1[0] && (x - r) < w1[0] && (y + r) < w4[1] && (y - r) > w1[1]) ||
-        ((y + r) > w1[1] && (y - r) < w1[1] && (x + r) < w4[0] && (x - r) > w1[0]) ||
-        ((x - r) < w4[0] && (x + r) > w4[0] && (y + r) < w4[1] && (y - r) > w1[1]) ||
-        ((y - r) < w4[1] && (y + r) > w4[1] && (x + r) < w4[0] && (x - r) > w1[0]))
-    {
-        return COLLISION_TANK;
-    }
-
-    return COLLISION_NONE;
+    return result ? COLLISION_TANK : COLLISION_NONE;
 }
 
 static collision check_earth_collision(Bullet bullet)
@@ -848,15 +855,7 @@ static collision check_earth_collision(Bullet bullet)
         return COLLISION_EARTH;
     }
 
-    if (bullet.position.x >= other_player->size.x &&
-        bullet.position.x <= (other_player->size.x + other_player->size.w) &&
-        bullet.position.y >= other_player->size.y &&
-        bullet.position.y <= (other_player->size.y + other_player->size.h))
-    {
-        return COLLISION_TANK;
-    }
-
-    return COLLISION_NONE;
+    return check_tank_collision(other_player, bullet.position.x + bullet.position.w / 2, bullet.position.y + bullet.position.h / 2, BULLET_W / 2);
 }
 
 static void swap_player(void)
