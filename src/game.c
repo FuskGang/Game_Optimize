@@ -136,7 +136,7 @@ static void get_player(Tank *player, char *name,
     player->points = 0;
     player->damage_target = DAMAGE_TARGET_NONE;
     player->is_shoot = 0;
-    player->hit_chance = 50;
+    player->hit_chance = 0;
 }
 
 static void drop_player(Tank *player)
@@ -329,11 +329,7 @@ static void do_bot_input(Tank *bot)
     if (bot->power < 60)
     {
         bot->input_time = SDL_GetTicks();
-
-        // if (bot->power < 100)
-        // {
-            bot->power += 1;
-        // }
+        bot->power += 1;
 
         return;
     }
@@ -343,18 +339,6 @@ static void do_bot_input(Tank *bot)
         is_success_shoot = 1;
         return;
     }
-
-    // if (bot->power > 80)
-    // {
-    //     bot->input_time = SDL_GetTicks();
-
-    //     if (bot->power > 1)
-    //     {
-    //         bot->power -= 1;
-    //     }
-
-    //     return;
-    // }
 
     if (!is_success_shoot)
     {
@@ -392,6 +376,9 @@ static void do_bot_input(Tank *bot)
         bot->arsenal[curr_player->weapon_order[curr_move]].count--;
 
         if ((rand() % 100) >= bot->hit_chance)
+        {
+            bot->muzzle.degrees += 3;
+        }
 
         return;
     }
