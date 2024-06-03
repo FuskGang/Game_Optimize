@@ -92,6 +92,7 @@ typedef struct
 	SDL_Window *window;
 	SDL_Rect mouse;
 	int keyboard[MAX_KEYBOARD_KEYS];
+	char last_input_sym;
 	Widget *active_widget;
 	int fps;
 } App;

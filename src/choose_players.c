@@ -3,13 +3,13 @@
 static void draw(void);
 static void update(void);
 
-int x_first_button_text = 500;
-int y_first_button_text = 200;
+static int x_first_button_text = 500;
+static int y_first_button_text = 200;
 
-char player_player_button_text[] = "Человек против человека";
-char player_bot_button_text[] = "Человек против компьютера";
-char bot_bot_button_text[] = "Компьютер против компьютера";
-char *curr_choose_text;
+static char player_player_button_text[] = "Человек против человека";
+static char player_bot_button_text[] = "Человек против компьютера";
+static char bot_bot_button_text[] = "Компьютер против компьютера";
+static char *curr_choose_text;
 
 void init_choose_players(void)
 {
@@ -63,7 +63,7 @@ static void update(void)
         {
             game_settings.is_first_player_bot = SDL_FALSE;
             game_settings.is_second_player_bot = SDL_FALSE;
-            init_shop();
+            init_choose_name();
         }
 
         if (curr_choose_text == player_bot_button_text)
@@ -78,6 +78,7 @@ static void update(void)
         {
             game_settings.is_first_player_bot = SDL_TRUE;
             game_settings.is_second_player_bot = SDL_TRUE;
+
             init_choose_difficult();
         }
         }

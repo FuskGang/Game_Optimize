@@ -106,14 +106,14 @@ static void update(void)
             else
             {
                 game_settings.second_player_difficult = choosen_difficult;
-                init_shop();
+                init_choose_name();
             }
         }
 
         else
         {
             game_settings.second_player_difficult = choosen_difficult;
-            init_shop();
+            init_choose_name();
         }
     }
 

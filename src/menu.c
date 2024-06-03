@@ -25,7 +25,7 @@ void init_menu(void)
 	w->x = x;
 	w->y = y + 0;
 	strcpy(w->label, "Играть");
-	w->action = &start;
+	w->action = start;
 
 	app.active_widget = w;
 
