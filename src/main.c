@@ -1,6 +1,7 @@
 #include "main.h"
 
 App app;
+GameSettings game_settings;
 Uint32 delta_time;
 int frame_count = 0;
 Uint32 last_time;
@@ -10,6 +11,7 @@ static void cap_frame_rate(Uint32 *then, Uint32 *deltaTime);
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {
     memset(&app, 0, sizeof(App));
+    memset(&game_settings, 0, sizeof(GameSettings));
 
     init_SDL();
 

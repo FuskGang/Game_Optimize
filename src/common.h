@@ -13,5 +13,6 @@
 #include "structs.h"
 
 extern App app;
+extern GameSettings game_settings;
 
 #endif /* COMMON */

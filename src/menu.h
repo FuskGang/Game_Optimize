@@ -9,6 +9,7 @@
 #include "shop.h"
 #include "about.h"
 #include "leaderboard.h"
+#include "choose_players.h"
 
 void init_menu(void);
 

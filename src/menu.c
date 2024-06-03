@@ -77,7 +77,7 @@ void draw_cursor(void)
 
 static void start(void)
 {
-	init_shop();
+	init_choose_players();
 }
 
 static void about(void)
