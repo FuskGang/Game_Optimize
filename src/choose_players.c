@@ -20,6 +20,7 @@ void init_choose_players(void)
 
 static void draw(void)
 {
+    draw_text("Выберите режим игры: ", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
     if (curr_choose_text == player_player_button_text)
     {
         draw_text(">", x_first_button_text - 40, y_first_button_text, 0, 255, 0);

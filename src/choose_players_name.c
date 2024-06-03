@@ -25,15 +25,24 @@ static void draw(void)
     {
         if (curr_player_temp_name == first_player_temp_name)
         {
-            draw_text("Введите имя первого игрока", 500, 200, 255, 255, 255);
+            draw_text("Введите имя первого игрока: ", 220, 200, 255, 255, 255);
         }
         else
         {
-            draw_text("Введите имя второго игрока", 500, 200, 255, 255, 255);
+            draw_text("Введите имя второго игрока: ", 220, 200, 255, 255, 255);
         }
     }
     else
     {
+        if (curr_player_temp_name == first_player_temp_name)
+        {
+            draw_text("Введите имя первого игрока: ", 220, 200, 255, 255, 255);
+        }
+        else
+        {
+            draw_text("Введите имя второго игрока: ", 220, 200, 255, 255, 255);
+        }
+
         draw_text(curr_player_temp_name, 500, 200, 255, 255, 255);
     }
 }

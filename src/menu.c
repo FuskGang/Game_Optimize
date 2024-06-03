@@ -6,6 +6,7 @@ static void draw_cursor(void);
 static void start(void);
 static void about(void);
 static void leaderboard(void);
+static void control(void);
 static void quit(void);
 
 static SDL_Texture *cursorTexture;
@@ -35,10 +36,16 @@ void init_menu(void)
 	strcpy(w->label, "Таблица лидеров");
 	w->action = leaderboard;
 
-	w = create_widget("help");
+	w = create_widget("control");
 	w->x = x;
 	w->y = y + 100;
-	strcpy(w->label, "Справка");
+	strcpy(w->label, "Управление");
+	w->action = control;
+
+	// w = create_widget("help");
+	// w->x = x;
+	// w->y = y + 150;
+	// strcpy(w->label, "Справка");
 
 	w = create_widget("about");
 	w->x = x;
@@ -88,6 +95,11 @@ static void about(void)
 static void leaderboard(void)
 {
 	init_leaderboard();
+}
+
+static void control(void)
+{
+	init_control();
 }
 
 static void quit(void)

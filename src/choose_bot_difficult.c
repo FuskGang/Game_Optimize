@@ -25,17 +25,17 @@ static void draw(void)
         
         if (!game_settings.first_player_difficult)
         {
-            draw_text("Выберите уровень сложности первому компьютеру", x_first_button_text, y_first_button_text - 50, 255, 255, 255);
+            draw_text("Выберите уровень сложности первому компьютеру:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
         }
         else
         {
-            draw_text("Выберите уровень сложности второму компьютеру", x_first_button_text, y_first_button_text - 50, 255, 255, 255);
+            draw_text("Выберите уровень сложности второму компьютеру:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
         }
     }
 
     else
     {
-        draw_text("Выберите уровень сложности компьютеру", x_first_button_text, y_first_button_text - 50, 255, 255, 255);
+        draw_text("Выберите уровень сложности компьютеру:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
     }
 
     if (curr_choose_text == easy_button_text)
