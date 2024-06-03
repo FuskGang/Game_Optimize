@@ -10,6 +10,7 @@
 #include "about.h"
 #include "leaderboard.h"
 #include "choose_players.h"
+#include "choose_bot_difficult.h"
 
 void init_menu(void);
 

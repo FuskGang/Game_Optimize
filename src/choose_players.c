@@ -50,6 +50,8 @@ static void update(void)
     if (app.keyboard[SDL_SCANCODE_ESCAPE])
     {
         app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
+        game_settings.is_first_player_bot = SDL_FALSE;
+        game_settings.is_second_player_bot = SDL_FALSE;
         init_menu();
     }
 
@@ -61,22 +63,24 @@ static void update(void)
         {
             game_settings.is_first_player_bot = SDL_FALSE;
             game_settings.is_second_player_bot = SDL_FALSE;
+            init_shop();
         }
 
         if (curr_choose_text == player_bot_button_text)
         {
             game_settings.is_first_player_bot = SDL_FALSE;
             game_settings.is_second_player_bot = SDL_TRUE;
+
+            init_choose_difficult();
         }
 
         if (curr_choose_text == bot_bot_button_text)
         {
             game_settings.is_first_player_bot = SDL_TRUE;
             game_settings.is_second_player_bot = SDL_TRUE;
+            init_choose_difficult();
         }
-
-        init_shop();
-    }
+        }
 
     if (app.keyboard[SDL_SCANCODE_UP])
     {
