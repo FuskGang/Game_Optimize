@@ -92,8 +92,19 @@ typedef struct
 	SDL_Window *window;
 	SDL_Rect mouse;
 	int keyboard[MAX_KEYBOARD_KEYS];
+	char last_input_sym;
 	Widget *active_widget;
 	int fps;
 } App;
+
+typedef struct
+{
+	char first_player_name[MAX_NAME_LENGTH];
+	char second_player_name[MAX_NAME_LENGTH];
+	SDL_bool is_first_player_bot;
+	SDL_bool is_second_player_bot;
+	int first_player_difficult;
+	int second_player_difficult;
+} GameSettings;
 
 #endif /* STRUCTS */
