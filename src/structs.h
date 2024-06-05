@@ -53,6 +53,7 @@ typedef struct
 {
 	char player_name[255];
 	int points;
+	int hit_chance;
 	SDL_Texture *texture;
 	SDL_Color color;
 	SDL_Rect size;

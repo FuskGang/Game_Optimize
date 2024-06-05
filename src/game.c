@@ -138,6 +138,7 @@ static void get_player(Tank *player, char *name,
     player->points = 0;
     player->damage_target = DAMAGE_TARGET_NONE;
     player->is_shoot = 0;
+    player->hit_chance = 0;
 }
 
 static void drop_player(Tank *player)
@@ -346,24 +347,14 @@ static void do_bot_input(Tank *bot)
     if (bot->power < 60)
     {
         bot->input_time = SDL_GetTicks();
-
-        if (bot->power < 100)
-        {
-            bot->power += 1;
-        }
+        bot->power += 1;
 
         return;
     }
 
-    if (bot->power > 80)
+    if (bot->power > 100)
     {
-        bot->input_time = SDL_GetTicks();
-
-        if (bot->power > 1)
-        {
-            bot->power -= 1;
-        }
-
+        is_success_shoot = 1;
         return;
     }
 
@@ -389,6 +380,7 @@ static void do_bot_input(Tank *bot)
 
             if (bot->muzzle.degrees < 0)
             {
+                bot->power += 10;
                 bot->muzzle.degrees += 360;
             }
         }
@@ -400,6 +392,12 @@ static void do_bot_input(Tank *bot)
     {
         bot->is_shoot = 1;
         bot->arsenal[curr_player->weapon_order[curr_move]].count--;
+
+        if ((rand() % 100) >= bot->hit_chance)
+        {
+            bot->muzzle.degrees += 3;
+        }
+
         return;
     }
 }
@@ -887,8 +885,8 @@ static void swap_player(void)
 
     if (curr_player->is_bot && curr_move != TOTAL_MOVES)
     {
-        curr_player->curr_item = &curr_player->arsenal[curr_player->weapon_order[curr_move]];
-        curr_player->power = (rand() % 60 + 20);
+        curr_player->curr_weapon = curr_player->arsenal[curr_player->weapon_order[curr_move]].weapon;
+        curr_player->power = (rand() % 50 + 20);
     }
 
     if (!curr_player->is_bot && curr_move != TOTAL_MOVES)
