@@ -2,7 +2,7 @@
 
 static void update(void);
 static void draw(void);
-static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_coord, SDL_bool is_bot);
+static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_coord, SDL_bool is_bot, int hit_chance);
 static void get_player(Tank *player, char *name,
                        int player_r, int player_g, int player_b,
                        int size_x, int size_y,
@@ -44,8 +44,8 @@ void init_game(ArsenalItem *left_arsenal, ArsenalItem *right_arsenal)
     player1 = malloc(sizeof(Tank));
     player2 = malloc(sizeof(Tank));
 
-    init_player(player1, left_arsenal, "First player", 100, SDL_FALSE);
-    init_player(player2, right_arsenal, "Second player", SCREEN_WIDTH - 400, SDL_FALSE);
+    init_player(player1, left_arsenal, game_settings.first_player_name, 100, game_settings.is_first_player_bot, game_settings.first_player_difficult);
+    init_player(player2, right_arsenal, game_settings.second_player_name, SCREEN_WIDTH - 400, game_settings.is_second_player_bot, game_settings.second_player_difficult);
 
     curr_player = player1;
     other_player = player2;
@@ -54,7 +54,7 @@ void init_game(ArsenalItem *left_arsenal, ArsenalItem *right_arsenal)
     app.delegate.draw = draw;
 }
 
-static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_coord, SDL_bool is_bot)
+static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_coord, SDL_bool is_bot, int hit_chance)
 {
     player->arsenal = arsenal;
 
@@ -65,6 +65,7 @@ static void init_player(Tank *player, ArsenalItem *arsenal, char *name, int x_co
                "assets/Tank.png");
 
     player->is_bot = is_bot;
+    player->hit_chance = hit_chance;
 
     srand(time(NULL));
 
@@ -138,7 +139,6 @@ static void get_player(Tank *player, char *name,
     player->points = 0;
     player->damage_target = DAMAGE_TARGET_NONE;
     player->is_shoot = 0;
-    player->hit_chance = 0;
 }
 
 static void drop_player(Tank *player)
@@ -885,7 +885,7 @@ static void swap_player(void)
 
     if (curr_player->is_bot && curr_move != TOTAL_MOVES)
     {
-        curr_player->curr_weapon = curr_player->arsenal[curr_player->weapon_order[curr_move]].weapon;
+        curr_player->curr_item = &curr_player->arsenal[curr_player->weapon_order[curr_move]];
         curr_player->power = (rand() % 50 + 20);
     }
 
