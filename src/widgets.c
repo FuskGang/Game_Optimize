@@ -52,6 +52,8 @@ void do_widgets(void)
 
 	if (app.keyboard[SDL_SCANCODE_RETURN])
 	{
+		app.keyboard[SDL_SCANCODE_RETURN] = 0;
+
 		if (app.active_widget->action != NULL)
 		{
 			app.active_widget->action();

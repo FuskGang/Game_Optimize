@@ -16,6 +16,11 @@ static void do_key_down(SDL_KeyboardEvent *event)
     }
 }
 
+static void do_textinput(char input_text[][32])
+{
+    app.last_input_sym = input_text[0][0];
+}
+
 void handle_input(void)
 {
     SDL_GetMouseState(&app.mouse.x, &app.mouse.y);
@@ -36,6 +41,10 @@ void handle_input(void)
 
         case SDL_KEYUP:
             do_key_up(&event.key);
+            break;
+
+        case SDL_TEXTINPUT:
+            do_textinput(&event.text.text);
             break;
 
         default:
