@@ -341,7 +341,6 @@ static void do_bot_input(Tank *bot)
 
     if (bot->power > 100)
     {
-        is_success_shoot = 1;
         return;
     }
 
@@ -382,7 +381,8 @@ static void do_bot_input(Tank *bot)
 
         if ((rand() % 100) >= bot->hit_chance)
         {
-            bot->muzzle.degrees += 3;
+            bot->muzzle.degrees += rand() % 10 - 5;
+            bot->power += rand() % 10 - 5;
         }
 
         return;
@@ -595,11 +595,6 @@ static void draw_player(Tank *player)
     {
         player->size.y = SCREEN_HEIGHT - player->size.h;
     }
-
-    SDL_RenderDrawLine(app.renderer, player->bounding_box[0].x, player->bounding_box[0].y, player->bounding_box[1].x, player->bounding_box[1].y);
-    SDL_RenderDrawLine(app.renderer, player->bounding_box[1].x, player->bounding_box[1].y, player->bounding_box[2].x, player->bounding_box[2].y);
-    SDL_RenderDrawLine(app.renderer, player->bounding_box[2].x, player->bounding_box[2].y, player->bounding_box[3].x, player->bounding_box[3].y);
-    SDL_RenderDrawLine(app.renderer, player->bounding_box[3].x, player->bounding_box[3].y, player->bounding_box[0].x, player->bounding_box[0].y);
 
     blit_rotated(player->texture, &player->size, FALSE, player->degrees);
     thickLineRGBA(app.renderer,

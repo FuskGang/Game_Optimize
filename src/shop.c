@@ -98,7 +98,7 @@ static void draw_left_weapons(void)
 {
     SDL_Rect dest;
     dest.w = 140;
-    dest.x = 100;
+    dest.x = 200;
     dest.y = 100;
     dest.h = dest.w / 4;
 
@@ -116,7 +116,7 @@ static void draw_right_weapons(void)
 {
     SDL_Rect dest;
     dest.w = 140;
-    dest.x = SCREEN_WIDTH - dest.w - 100;
+    dest.x = SCREEN_WIDTH - 200;
     dest.y = 100;
     dest.h = dest.w / 4;
 
