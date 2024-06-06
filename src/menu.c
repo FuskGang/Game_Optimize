@@ -42,11 +42,6 @@ void init_menu(void)
 	strcpy(w->label, "Управление");
 	w->action = control;
 
-	// w = create_widget("help");
-	// w->x = x;
-	// w->y = y + 150;
-	// strcpy(w->label, "Справка");
-
 	w = create_widget("about");
 	w->x = x;
 	w->y = y + 150;

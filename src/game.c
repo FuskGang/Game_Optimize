@@ -306,19 +306,6 @@ static void do_human_input(Tank *player)
         update_leaderboard(rand(), "LOL");
         player->input_time = SDL_GetTicks();
     }
-
-    // if (app.keyboard[SDL_SCANCODE_B])
-    // {
-    //     if (do_test_shoot() == SDL_FALSE)
-    //     {
-    //         player->muzzle.degrees += 1;
-
-    //         if (player->muzzle.degrees < 0)
-    //         {
-    //             player->muzzle.degrees += 360;
-    //         }
-    //     }
-    // }
 }
 
 static void do_bot_input(Tank *bot)
