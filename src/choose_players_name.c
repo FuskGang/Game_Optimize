@@ -85,7 +85,7 @@ static void update(void)
 
         else
         {
-            strcpy(game_settings.first_player_name, second_player_temp_name);
+            strcpy(game_settings.second_player_name, second_player_temp_name);
             SDL_StopTextInput();
             init_shop();
         }
