@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "menu.h"
+#include "widgets.h"
 
 void init_choose_difficult(void);
 
