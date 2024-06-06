@@ -3,7 +3,8 @@
 
 #include "common.h"
 #include "menu.h"
+#include "widgets.h"
 
 void init_choose_players(void);
 
-#endif
+#endif /* CHOOSE_PLAYERS */

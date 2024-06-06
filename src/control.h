@@ -6,4 +6,4 @@
 
 void init_control(void);
 
-#endif
+#endif /* CONTROL */

@@ -26,7 +26,7 @@ void generate_pixel_map()
     double x = GEN_FUNC_A;
     double x_offset = fabs(GEN_FUNC_A) * 2 / (double)SCREEN_WIDTH;
 
-    double a = (rand() % 200) / 100.0f; // 0.0 - 2.0
+    double a = (rand() % 200) / 100.0f; 
 
     for (int pixel_x = 0; pixel_x < SCREEN_WIDTH; pixel_x++)
     {
