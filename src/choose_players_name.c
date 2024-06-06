@@ -14,6 +14,8 @@ void init_choose_name(void)
     app.delegate.draw = draw;
     app.delegate.update = update;
     curr_player_temp_name = first_player_temp_name;
+    memset(first_player_temp_name, 0, MAX_NAME_LENGTH);
+    memset(second_player_temp_name, 0, MAX_NAME_LENGTH);
     curr_player_name_ind = 0;
     app.last_input_sym = 0;
     SDL_StartTextInput();
