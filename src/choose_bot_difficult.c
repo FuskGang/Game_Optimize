@@ -2,69 +2,69 @@
 
 static void draw(void);
 static void update(void);
+static void easy_mode(void);
+static void medium_mode(void);
+static void hard_mode(void);
+static void set_difficult(void);
 
 static int x_first_button_text = 500;
 static int y_first_button_text = 200;
 
-static char easy_button_text[] = "Легкий уровень сложности";
-static char medium_button_text[] = "Средний уровень сложности";
-static char hard_button_text[] = "Тяжелый уровень сложности";
-static char *curr_choose_text;
+static int difficult = 0;
 
 void init_choose_difficult(void)
 {
+    clear_widgets();
+    Widget *w;
+
+    w = create_widget("easy");
+    w->x = x_first_button_text;
+    w->y = y_first_button_text + 0;
+    strcpy(w->label, "Лёгкий уровень сложности");
+    w->action = easy_mode;
+
+    app.active_widget = w;
+
+    w = create_widget("medium");
+    w->x = x_first_button_text;
+    w->y = y_first_button_text + 50;
+    strcpy(w->label, "Средний уровень сложности");
+    w->action = medium_mode;
+
+    w = create_widget("hard");
+    w->x = x_first_button_text;
+    w->y = y_first_button_text + 100;
+    strcpy(w->label, "Тяжёлый уровень сложности");
+    w->action = hard_mode;
+
     app.delegate.draw = draw;
     app.delegate.update = update;
-    curr_choose_text = easy_button_text;
 }
 
 static void draw(void)
 {
+    draw_widgets();
+
     if (game_settings.is_first_player_bot)
     {
-        
         if (!game_settings.first_player_difficult)
         {
-            draw_text("Выберите уровень сложности первому компьютеру:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
+            draw_text("Сложность первого компьютера:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
         }
         else
         {
-            draw_text("Выберите уровень сложности второму компьютеру:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
+            draw_text("Сложность второго компьютера:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
         }
     }
-
     else
     {
-        draw_text("Выберите уровень сложности компьютеру:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
-    }
-
-    if (curr_choose_text == easy_button_text)
-    {
-        draw_text(">", x_first_button_text - 40, y_first_button_text, 0, 255, 0);
-        draw_text(easy_button_text, x_first_button_text, y_first_button_text, 0, 255, 0);
-        draw_text(medium_button_text, x_first_button_text, y_first_button_text + 50, 255, 255, 255);
-        draw_text(hard_button_text, x_first_button_text, y_first_button_text + 100, 255, 255, 255);
-    }
-
-    if (curr_choose_text == medium_button_text)
-    {
-        draw_text(easy_button_text, x_first_button_text, y_first_button_text, 255, 255, 255);
-        draw_text(">", x_first_button_text - 40, y_first_button_text + 50, 0, 255, 0);
-        draw_text(medium_button_text, x_first_button_text, y_first_button_text + 50, 0, 255, 0);
-        draw_text(hard_button_text, x_first_button_text, y_first_button_text + 100, 255, 255, 255);
-    }
-
-    if (curr_choose_text == hard_button_text)
-    {
-        draw_text(easy_button_text, x_first_button_text, y_first_button_text, 255, 255, 255);
-        draw_text(medium_button_text, x_first_button_text, y_first_button_text + 50, 255, 255, 255);
-        draw_text(">", x_first_button_text - 40, y_first_button_text + 100, 0, 255, 0);
-        draw_text(hard_button_text, x_first_button_text, y_first_button_text + 100, 0, 255, 0);
+        draw_text("Сложность компьютера:", x_first_button_text - 40, y_first_button_text - 50, 255, 255, 255);
     }
 }
 
 static void update(void)
 {
+    do_widgets();
     if (app.keyboard[SDL_SCANCODE_ESCAPE])
     {
         app.keyboard[SDL_SCANCODE_ESCAPE] = 0;
@@ -72,88 +72,45 @@ static void update(void)
         game_settings.is_second_player_bot = SDL_FALSE;
         game_settings.first_player_difficult = 0;
         game_settings.second_player_difficult = 0;
-
         init_menu();
     }
+}
 
-    if (app.keyboard[SDL_SCANCODE_RETURN])
+static void easy_mode(void)
+{
+    difficult = EASY;
+    set_difficult();
+}
+
+static void medium_mode(void)
+{
+    difficult = MEDIUM;
+    set_difficult();
+}
+
+static void hard_mode(void)
+{
+    difficult = HARD;
+    set_difficult();
+}
+
+static void set_difficult(void)
+{
+    if (game_settings.is_first_player_bot)
     {
-        app.keyboard[SDL_SCANCODE_RETURN] = 0;
-        int choosen_difficult = 0;
-
-        if (curr_choose_text == easy_button_text)
+        if (!game_settings.first_player_difficult)
         {
-            choosen_difficult = EASY;
+            game_settings.first_player_difficult = difficult;
         }
-
-        else if (curr_choose_text == medium_button_text)
-        {
-            choosen_difficult = MEDIUM;
-        }
-
-        else if (curr_choose_text == hard_button_text)
-        {
-            choosen_difficult = HARD;
-        }
-
-        if (game_settings.is_first_player_bot)
-        {
-
-            if (!game_settings.first_player_difficult)
-            {
-                game_settings.first_player_difficult = choosen_difficult;
-            }
-            else
-            {
-                game_settings.second_player_difficult = choosen_difficult;
-                init_choose_name();
-            }
-        }
-
         else
         {
-            game_settings.second_player_difficult = choosen_difficult;
+            game_settings.second_player_difficult = difficult;
             init_choose_name();
         }
     }
-
-    if (app.keyboard[SDL_SCANCODE_UP])
+    else
     {
-        app.keyboard[SDL_SCANCODE_UP] = 0;
-
-        if (curr_choose_text == easy_button_text)
-        {
-            curr_choose_text = hard_button_text;
-        }
-
-        else if (curr_choose_text == medium_button_text)
-        {
-            curr_choose_text = easy_button_text;
-        }
-
-        else if (curr_choose_text == hard_button_text)
-        {
-            curr_choose_text = medium_button_text;
-        }
-    }
-
-    if (app.keyboard[SDL_SCANCODE_DOWN])
-    {
-        app.keyboard[SDL_SCANCODE_DOWN] = 0;
-
-        if (curr_choose_text == easy_button_text)
-        {
-            curr_choose_text = medium_button_text;
-        }
-
-        else if (curr_choose_text == medium_button_text)
-        {
-            curr_choose_text = hard_button_text;
-        }
-
-        else if (curr_choose_text == hard_button_text)
-        {
-            curr_choose_text = easy_button_text;
-        }
+        game_settings.second_player_difficult = difficult;
+        init_choose_name();
     }
 }
